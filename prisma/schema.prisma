@@ -1,15 +1,11 @@
-// To switch to Supabase (Postgres) for production:
-//   1. Change provider to "postgresql"
-//   2. Add directUrl = env("DIRECT_URL")
-//   3. Run: npx prisma migrate dev --name init
-
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "sqlite"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
 model Restaurant {
@@ -33,11 +29,11 @@ model Restaurant {
   price_level     Int?
   photo           String?
   street_view     String?
-  working_hours   String?  // JSON stored as text — parse with JSON.parse()
+  working_hours   String?
   business_status String   @default("OPERATIONAL")
   description     String?
-  cuisine_tags    String?  // pipe-separated, e.g. "north-indian|punjabi"
-  dietary_tags    String?  // pipe-separated, e.g. "pure-veg|jain"
+  cuisine_tags    String?
+  dietary_tags    String?
   is_hidden_gem   Boolean  @default(false)
   publish_priority Int     @default(0)
   is_published    Boolean  @default(false)
