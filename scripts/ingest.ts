@@ -14,11 +14,14 @@ const prisma = new PrismaClient();
 const BATCH_SIZE = 100;
 
 function findExcelFile(): string {
-  const parentDir = path.join(__dirname, '..', '..');
-  const files = fs.readdirSync(parentDir);
+  // Look in data/ directory at the project root (alongside scripts/, app/, etc.)
+  const dataDir = path.join(__dirname, '..', 'data');
+  const rootDir = path.join(__dirname, '..');
+  const searchDir = fs.existsSync(dataDir) ? dataDir : rootDir;
+  const files = fs.readdirSync(searchDir);
   const xlsx = files.find(f => f.endsWith('.xlsx') || f.endsWith('.xls'));
-  if (!xlsx) throw new Error(`No Excel file found in ${parentDir}`);
-  const p = path.join(parentDir, xlsx);
+  if (!xlsx) throw new Error(`No Excel file found in ${searchDir}`);
+  const p = path.join(searchDir, xlsx);
   console.log(`Found data file: ${p}`);
   return p;
 }
