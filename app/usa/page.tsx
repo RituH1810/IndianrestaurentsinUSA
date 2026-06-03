@@ -1,3 +1,5 @@
+export const revalidate = 3600;
+
 import Link from 'next/link';
 import { prisma } from '@/lib/prisma';
 import { stateNameToSlug } from '@/lib/utils';

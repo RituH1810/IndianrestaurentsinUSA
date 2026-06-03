@@ -1,3 +1,5 @@
+export const revalidate = 3600; // re-fetch from DB every hour
+
 import Link from 'next/link';
 import { prisma } from '@/lib/prisma';
 import { slugToLabel, cityNameToSlug } from '@/lib/utils';
