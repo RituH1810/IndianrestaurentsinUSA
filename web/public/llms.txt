@@ -1,0 +1,35 @@
+# Indian Restaurants in USA
+> The most complete directory of Indian restaurants across the United States, with regional cuisine and dietary filtering not found on any other platform.
+
+## Purpose
+This site helps people find Indian restaurants in the USA filtered by:
+- Regional Indian cuisine (North Indian, South Indian, Hyderabadi, Gujarati, Indo-Chinese, etc.)
+- Dietary needs (Jain, pure vegetarian, vegan, halal, gluten-free)
+- Location (state, city, metro area)
+
+## Key Pages
+- `/` — Homepage with search, cuisine chips, dietary filters, and featured metros
+- `/restaurants/[slug]` — Individual restaurant listings with hours, ratings, cuisine/dietary tags
+- `/usa/[state]/indian-restaurants` — State hub pages
+- `/usa/[state]/[city]/indian-restaurants` — City hub pages
+- `/indian-food/[cuisine]` — Regional cuisine hubs
+- `/indian-restaurants/[diet]` — Dietary filter hubs
+- `/best-indian-restaurants` — Hidden gem algorithm results
+- `/map` — Interactive map of all published restaurants
+- `/guides/[slug]` — Expert guides to Indian food in America
+- `/data/[report]` — Original research on Indian restaurant density
+
+## Cuisine Taxonomy
+north-indian, south-indian, indo-chinese, punjabi, gujarati, bengali, hyderabadi, mughlai, kerala, chaat, rajasthani, maharashtrian
+
+## Dietary Taxonomy
+pure-veg, vegan, jain, halal, gluten-free
+
+## Data Methodology
+Restaurant data is sourced from Google Places (via Outscraper). Regional cuisine and dietary tags are classified by Claude AI (Anthropic). Hidden gems are algorithmically identified: rating ≥ 4.5, reviews < 200, operational status confirmed.
+
+## Priority Metros
+Edison NJ, Bay Area CA, Chicago IL, Houston TX, New York City NY, Dallas TX, Atlanta GA, DC-Northern Virginia, Seattle-Bellevue WA, Boston MA, Charlotte NC
+
+## Contact
+website: https://www.indianrestaurantsinusa.com
