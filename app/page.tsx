@@ -6,7 +6,7 @@ const FEATURED_METROS = [
   { label: 'Bay Area, CA', href: '/usa/california/fremont/indian-restaurants', sub: 'California' },
   { label: 'Chicago', href: '/usa/illinois/chicago/indian-restaurants', sub: 'Illinois' },
   { label: 'Houston', href: '/usa/texas/houston/indian-restaurants', sub: 'Texas' },
-  { label: 'New York City', href: '/usa/new-york/new-york-city/indian-restaurants', sub: 'New York' },
+  { label: 'New York', href: '/usa/new-york/new-york-city/indian-restaurants', sub: 'New York' },
   { label: 'Dallas', href: '/usa/texas/dallas/indian-restaurants', sub: 'Texas' },
   { label: 'Charlotte', href: '/usa/north-carolina/charlotte/indian-restaurants', sub: 'North Carolina' },
   { label: 'Atlanta', href: '/usa/georgia/atlanta/indian-restaurants', sub: 'Georgia' },
