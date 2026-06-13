@@ -50,3 +50,20 @@ export interface RestaurantCardData {
   is_hidden_gem: boolean;
   description?: string | null;
 }
+
+export interface RestaurantListData {
+  slug: string;
+  name: string;
+  city: string;
+  state: string;
+  rating: number | null;
+  reviews: number | null;
+  photo: string | null;
+  cuisine_tags: string | null;
+  dietary_tags: string | null;
+  is_hidden_gem: boolean;
+  description: string | null;
+  phone: string | null;
+  website: string | null;
+  business_status: string | null;
+}
