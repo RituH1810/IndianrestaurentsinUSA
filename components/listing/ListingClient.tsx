@@ -62,13 +62,13 @@ export function ListingClient({ restaurants, total }: Props) {
   return (
     <div>
       {/* Sticky filter bar */}
-      <div className="sticky top-14 z-30 bg-white border-b border-gray-100 -mx-4 px-4 py-3 mb-2">
+      <div className="sticky top-14 z-30 bg-amber-50/95 backdrop-blur-sm border-b border-amber-200/60 -mx-4 px-4 py-3 mb-2 shadow-sm">
         <div className="flex flex-wrap gap-2 items-center">
           {/* Sort */}
           <select
             value={sortBy}
             onChange={e => setSortBy(e.target.value as SortKey)}
-            className="text-sm border border-gray-200 rounded-full px-3 py-1.5 bg-white text-gray-700 focus:outline-none focus:ring-1 focus:ring-saffron cursor-pointer"
+            className="text-sm border border-amber-200 rounded-full px-3 py-1.5 bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-saffron/50 cursor-pointer shadow-sm"
           >
             <option value="recommended">Best Match</option>
             <option value="rating">Highest Rated</option>
@@ -76,17 +76,17 @@ export function ListingClient({ restaurants, total }: Props) {
             <option value="name">A to Z</option>
           </select>
 
-          <div className="w-px h-5 bg-gray-200" />
+          <div className="w-px h-5 bg-amber-200" />
 
           {/* Rating */}
           {([4.0, 4.5] as number[]).map(r => (
             <button
               key={r}
               onClick={() => setMinRating(minRating === r ? null : r)}
-              className={`text-xs rounded-full px-3 py-1.5 border font-medium transition-colors ${
+              className={`text-xs rounded-full px-3 py-1.5 border font-semibold transition-all shadow-sm ${
                 minRating === r
-                  ? 'bg-maroon text-white border-maroon'
-                  : 'bg-white text-gray-600 border-gray-200 hover:border-saffron hover:text-spice'
+                  ? 'bg-maroon text-white border-maroon shadow-maroon/20 shadow-md'
+                  : 'bg-white text-gray-600 border-amber-200 hover:border-saffron hover:text-spice hover:bg-amber-50'
               }`}
             >
               ★ {r}+
@@ -98,10 +98,10 @@ export function ListingClient({ restaurants, total }: Props) {
             <button
               key={c.tag}
               onClick={() => setCuisineFilter(cuisineFilter === c.tag ? null : c.tag)}
-              className={`text-xs rounded-full px-3 py-1.5 border font-medium transition-colors ${
+              className={`text-xs rounded-full px-3 py-1.5 border font-semibold transition-all shadow-sm ${
                 cuisineFilter === c.tag
-                  ? 'bg-spice text-white border-spice'
-                  : 'bg-white text-gray-600 border-gray-200 hover:border-saffron hover:text-spice'
+                  ? 'bg-spice text-white border-spice shadow-spice/20 shadow-md'
+                  : 'bg-white text-gray-600 border-amber-200 hover:border-saffron hover:text-spice hover:bg-amber-50'
               }`}
             >
               {c.label}
@@ -113,10 +113,10 @@ export function ListingClient({ restaurants, total }: Props) {
             <button
               key={d.tag}
               onClick={() => setDietaryFilter(dietaryFilter === d.tag ? null : d.tag)}
-              className={`text-xs rounded-full px-3 py-1.5 border font-medium transition-colors ${
+              className={`text-xs rounded-full px-3 py-1.5 border font-semibold transition-all shadow-sm ${
                 dietaryFilter === d.tag
-                  ? 'bg-emerald-600 text-white border-emerald-600'
-                  : 'bg-white text-gray-600 border-gray-200 hover:border-green-400 hover:text-emerald-700'
+                  ? 'bg-emerald-600 text-white border-emerald-600 shadow-emerald-200 shadow-md'
+                  : 'bg-white text-gray-600 border-amber-200 hover:border-green-400 hover:text-emerald-700 hover:bg-emerald-50'
               }`}
             >
               {d.label}
@@ -127,17 +127,17 @@ export function ListingClient({ restaurants, total }: Props) {
           {hasActiveFilters && (
             <button
               onClick={clearAll}
-              className="text-xs text-spice font-semibold hover:underline ml-1"
+              className="text-xs bg-red-50 text-red-600 border border-red-200 rounded-full px-3 py-1.5 font-semibold hover:bg-red-100 transition-colors ml-1"
             >
-              Clear filters ✕
+              Clear ✕
             </button>
           )}
         </div>
       </div>
 
       {/* Count row */}
-      <div className="flex items-center justify-between py-3 text-sm text-gray-500">
-        <span>
+      <div className="flex items-center justify-between py-3 text-sm">
+        <span className={hasActiveFilters ? 'font-semibold text-spice' : 'text-gray-500'}>
           {hasActiveFilters
             ? `${filtered.length} of ${restaurants.length} restaurants`
             : `${total ?? restaurants.length} restaurants`}
@@ -146,9 +146,13 @@ export function ListingClient({ restaurants, total }: Props) {
 
       {/* List */}
       {filtered.length === 0 ? (
-        <div className="text-center py-20 text-gray-400">
-          <p className="text-lg mb-3">No restaurants match your filters.</p>
-          <button onClick={clearAll} className="text-spice font-semibold text-sm hover:underline">
+        <div className="text-center py-20">
+          <div className="text-4xl mb-4">🍽️</div>
+          <p className="text-lg mb-3 text-gray-500 font-medium">No restaurants match your filters.</p>
+          <button
+            onClick={clearAll}
+            className="text-sm bg-spice text-white px-5 py-2 rounded-full font-semibold hover:bg-maroon transition-colors"
+          >
             Clear all filters
           </button>
         </div>

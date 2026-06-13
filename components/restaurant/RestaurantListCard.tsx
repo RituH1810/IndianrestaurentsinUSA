@@ -12,22 +12,47 @@ interface Props {
   rank?: number;
 }
 
+function RankBadge({ rank }: { rank: number }) {
+  if (rank === 1) {
+    return (
+      <div className="flex-shrink-0 w-8 pt-1 text-right">
+        <span className="text-base font-black text-amber-400 drop-shadow-sm">🥇</span>
+      </div>
+    );
+  }
+  if (rank === 2) {
+    return (
+      <div className="flex-shrink-0 w-8 pt-1 text-right">
+        <span className="text-base font-black text-gray-400 drop-shadow-sm">🥈</span>
+      </div>
+    );
+  }
+  if (rank === 3) {
+    return (
+      <div className="flex-shrink-0 w-8 pt-1 text-right">
+        <span className="text-base font-black text-amber-700 drop-shadow-sm">🥉</span>
+      </div>
+    );
+  }
+  return (
+    <div className="flex-shrink-0 w-8 pt-1 text-right">
+      <span className="text-xs font-bold text-gray-300">#{rank}</span>
+    </div>
+  );
+}
+
 export function RestaurantListCard({ restaurant, rank }: Props) {
   const cuisineTags = parseTags(restaurant.cuisine_tags);
   const dietaryTags = parseTags(restaurant.dietary_tags);
   const isOpen = restaurant.business_status === 'OPERATIONAL';
 
   return (
-    <div className="py-5 flex gap-4 items-start group hover:bg-gray-50/60 -mx-4 px-4 rounded-xl transition-colors">
-      {/* Rank number */}
-      {rank != null && (
-        <div className="flex-shrink-0 w-8 pt-1 text-right">
-          <span className="text-sm font-bold text-gray-300">#{rank}</span>
-        </div>
-      )}
+    <div className="py-5 flex gap-4 items-start group hover:bg-amber-50/50 -mx-4 px-4 rounded-xl transition-colors">
+      {/* Rank */}
+      {rank != null && <RankBadge rank={rank} />}
 
       {/* Photo */}
-      <div className="flex-shrink-0 relative w-28 h-24 rounded-xl overflow-hidden bg-gray-100">
+      <div className="flex-shrink-0 relative w-28 h-24 rounded-xl overflow-hidden bg-gray-100 shadow-sm group-hover:shadow-md transition-shadow">
         {restaurant.photo ? (
           <Image
             src={restaurant.photo}
@@ -38,8 +63,8 @@ export function RestaurantListCard({ restaurant, rank }: Props) {
             sizes="112px"
           />
         ) : (
-          <div className="h-full flex items-center justify-center bg-gradient-to-br from-cream to-saffron/10">
-            <span className="text-2xl opacity-20 select-none" aria-hidden="true">🍛</span>
+          <div className="h-full flex items-center justify-center bg-gradient-to-br from-saffron/20 to-spice/20">
+            <span className="text-2xl opacity-40 select-none" aria-hidden="true">🍛</span>
           </div>
         )}
       </div>
@@ -97,7 +122,11 @@ export function RestaurantListCard({ restaurant, rank }: Props) {
         {/* Status + contact */}
         <div className="flex flex-wrap items-center gap-3 mt-2">
           {restaurant.business_status && (
-            <span className={`text-xs font-semibold ${isOpen ? 'text-emerald-600' : 'text-red-500'}`}>
+            <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${
+              isOpen
+                ? 'bg-emerald-100 text-emerald-700'
+                : 'bg-red-100 text-red-600'
+            }`}>
               ● {isOpen ? 'Open' : 'Closed'}
             </span>
           )}
@@ -115,7 +144,7 @@ export function RestaurantListCard({ restaurant, rank }: Props) {
               href={restaurant.website}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-xs text-spice hover:underline font-medium"
+              className="text-xs text-spice hover:text-maroon font-semibold hover:underline transition-colors"
               onClick={e => e.stopPropagation()}
             >
               Visit Website →
