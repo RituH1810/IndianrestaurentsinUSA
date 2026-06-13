@@ -52,7 +52,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${dmSans.variable} ${fraunces.variable} font-sans antialiased bg-cream text-gray-900`}>
+      <body className={`${dmSans.variable} ${fraunces.variable} font-sans antialiased bg-white text-gray-900`}>
         <OrganizationJsonLd />
         <a
           href="#main-content"

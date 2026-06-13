@@ -28,11 +28,11 @@ const COMPANY_LINKS = [
 
 export default function Footer() {
   return (
-    <footer className="bg-maroon text-cream/80 mt-16">
+    <footer className="bg-gray-900 text-gray-300 mt-16">
       <div className="container mx-auto px-4 py-12">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div>
-            <Link href="/" className="text-cream font-bold text-lg hover:text-saffron transition-colors">
+            <Link href="/" className="text-white font-bold text-lg hover:text-saffron transition-colors">
               Indian Restaurants in USA
             </Link>
             <p className="text-sm leading-relaxed mt-3">
@@ -41,7 +41,7 @@ export default function Footer() {
           </div>
 
           <div>
-            <h3 className="text-cream font-semibold mb-3 text-sm uppercase tracking-wide">By Cuisine</h3>
+            <h3 className="text-white font-semibold mb-3 text-sm uppercase tracking-wide">By Cuisine</h3>
             <ul className="space-y-1.5 text-sm">
               {CUISINE_LINKS.map(link => (
                 <li key={link.href}>
@@ -54,7 +54,7 @@ export default function Footer() {
           </div>
 
           <div>
-            <h3 className="text-cream font-semibold mb-3 text-sm uppercase tracking-wide">Dietary</h3>
+            <h3 className="text-white font-semibold mb-3 text-sm uppercase tracking-wide">Dietary</h3>
             <ul className="space-y-1.5 text-sm">
               {DIETARY_LINKS.map(link => (
                 <li key={link.href}>
@@ -67,7 +67,7 @@ export default function Footer() {
           </div>
 
           <div>
-            <h3 className="text-cream font-semibold mb-3 text-sm uppercase tracking-wide">Company</h3>
+            <h3 className="text-white font-semibold mb-3 text-sm uppercase tracking-wide">Company</h3>
             <ul className="space-y-1.5 text-sm">
               {COMPANY_LINKS.map(link => (
                 <li key={link.href}>
@@ -80,7 +80,7 @@ export default function Footer() {
           </div>
         </div>
 
-        <div className="border-t border-spice mt-8 pt-6 flex flex-col sm:flex-row justify-between items-center gap-4 text-xs text-cream/60">
+        <div className="border-t border-gray-700 mt-8 pt-6 flex flex-col sm:flex-row justify-between items-center gap-4 text-xs text-gray-500">
           <p>© 2025 Indian Restaurants in USA. All rights reserved.</p>
           <div className="flex gap-4">
             <Link href="/privacy" className="hover:text-cream transition-colors">Privacy Policy</Link>

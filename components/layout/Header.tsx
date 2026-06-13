@@ -15,20 +15,20 @@ export default function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
 
   return (
-    <header className="bg-maroon text-cream sticky top-0 z-40 border-b border-spice/30">
+    <header className="bg-white text-gray-900 sticky top-0 z-40 border-b border-gray-100 shadow-sm">
       <nav className="container mx-auto px-4 h-14 flex items-center justify-between gap-6">
         {/* Logo */}
         <Link href="/" className="shrink-0 flex items-center gap-2.5">
           <Image
             src="/logo.png"
             alt="Indian Restaurants in USA"
-            width={36}
-            height={36}
+            width={34}
+            height={34}
             className="rounded-full object-cover"
             priority
           />
-          <span className="font-bold text-sm tracking-tight leading-none">
-            Indian Restaurants <span className="text-saffron">in USA</span>
+          <span className="font-bold text-sm tracking-tight leading-none text-gray-900">
+            Indian Restaurants <span className="text-spice">in USA</span>
           </span>
         </Link>
 
@@ -38,7 +38,7 @@ export default function Header() {
             <Link
               key={link.href}
               href={link.href}
-              className="text-cream/75 hover:text-saffron transition-colors font-medium"
+              className="text-gray-500 hover:text-spice transition-colors font-medium"
             >
               {link.label}
             </Link>
@@ -48,10 +48,10 @@ export default function Header() {
         {/* Desktop search */}
         <form
           action="/search"
-          className="hidden lg:flex items-center gap-2 bg-white/10 hover:bg-white/15 rounded-full px-4 py-1.5 transition-colors"
+          className="hidden lg:flex items-center gap-2 bg-gray-50 hover:bg-gray-100 border border-gray-200 rounded-full px-4 py-1.5 transition-colors"
         >
           <label htmlFor="header-search" className="sr-only">Search</label>
-          <svg className="w-3.5 h-3.5 text-cream/50 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+          <svg className="w-3.5 h-3.5 text-gray-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
           </svg>
           <input
@@ -59,39 +59,39 @@ export default function Header() {
             name="q"
             type="search"
             placeholder="Search restaurants…"
-            className="bg-transparent text-sm text-cream placeholder-cream/40 focus:outline-none w-36"
+            className="bg-transparent text-sm text-gray-700 placeholder-gray-400 focus:outline-none w-36"
           />
         </form>
 
         {/* Mobile hamburger */}
         <button
-          className="lg:hidden p-2 rounded-md hover:bg-white/10 transition-colors"
+          className="lg:hidden p-2 rounded-md hover:bg-gray-100 transition-colors"
           onClick={() => setMenuOpen(!menuOpen)}
           aria-label={menuOpen ? 'Close menu' : 'Open menu'}
           aria-expanded={menuOpen}
         >
-          <span className={`block w-5 h-[1.5px] bg-cream transition-all origin-center ${menuOpen ? 'rotate-45 translate-y-[7px]' : ''}`} />
-          <span className={`block w-5 h-[1.5px] bg-cream mt-1.5 transition-all ${menuOpen ? 'opacity-0' : ''}`} />
-          <span className={`block w-5 h-[1.5px] bg-cream mt-1.5 transition-all origin-center ${menuOpen ? '-rotate-45 -translate-y-[7px]' : ''}`} />
+          <span className={`block w-5 h-[1.5px] bg-gray-600 transition-all origin-center ${menuOpen ? 'rotate-45 translate-y-[7px]' : ''}`} />
+          <span className={`block w-5 h-[1.5px] bg-gray-600 mt-1.5 transition-all ${menuOpen ? 'opacity-0' : ''}`} />
+          <span className={`block w-5 h-[1.5px] bg-gray-600 mt-1.5 transition-all origin-center ${menuOpen ? '-rotate-45 -translate-y-[7px]' : ''}`} />
         </button>
       </nav>
 
       {/* Mobile menu */}
       {menuOpen && (
-        <div className="lg:hidden bg-maroon border-t border-spice/30 px-5 pb-5 pt-3 flex flex-col gap-3">
+        <div className="lg:hidden bg-white border-t border-gray-100 px-5 pb-5 pt-3 flex flex-col gap-3 shadow-md">
           {NAV_LINKS.map(link => (
             <Link
               key={link.href}
               href={link.href}
-              className="text-cream/75 hover:text-saffron transition-colors text-sm font-medium py-1"
+              className="text-gray-600 hover:text-spice transition-colors text-sm font-medium py-1"
               onClick={() => setMenuOpen(false)}
             >
               {link.label}
             </Link>
           ))}
-          <form action="/search" className="flex items-center gap-2 bg-white/10 rounded-full px-4 py-2.5 mt-2">
+          <form action="/search" className="flex items-center gap-2 bg-gray-50 border border-gray-200 rounded-full px-4 py-2.5 mt-2">
             <label htmlFor="mobile-search" className="sr-only">Search</label>
-            <svg className="w-3.5 h-3.5 text-cream/50 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+            <svg className="w-3.5 h-3.5 text-gray-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
             </svg>
             <input
@@ -99,9 +99,9 @@ export default function Header() {
               name="q"
               type="search"
               placeholder="Search restaurants…"
-              className="flex-1 bg-transparent text-sm text-cream placeholder-cream/40 focus:outline-none"
+              className="flex-1 bg-transparent text-sm text-gray-700 placeholder-gray-400 focus:outline-none"
             />
-            <button type="submit" className="text-saffron text-sm font-bold ml-1">Go</button>
+            <button type="submit" className="text-spice text-sm font-bold ml-1">Go</button>
           </form>
         </div>
       )}

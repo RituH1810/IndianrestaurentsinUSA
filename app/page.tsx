@@ -41,54 +41,59 @@ const WHY_CARDS = [
     icon: '🗺️',
     title: 'Regional Cuisine Classification',
     body: "Every listing is classified by regional Indian cuisine — North Indian, South Indian, Hyderabadi, Gujarati, and more. This data doesn't exist anywhere else.",
-    accent: 'from-saffron/25 to-turmeric/10',
+    bg: 'bg-blue-50 border-blue-100',
+    iconBg: 'bg-blue-100',
   },
   {
     icon: '🙏',
     title: 'Jain & Dietary Filtering',
     body: 'The only directory that lets you filter for Jain-friendly restaurants (no onion, garlic, or root vegetables). Also covers vegan, pure-veg, halal, and gluten-free.',
-    accent: 'from-violet-400/25 to-emerald-400/10',
+    bg: 'bg-violet-50 border-violet-100',
+    iconBg: 'bg-violet-100',
   },
   {
     icon: '💎',
     title: 'Hidden Gems',
     body: 'Our algorithm surfaces highly-rated restaurants with fewer than 200 reviews — the authentic neighbourhood spots that chains and food blogs ignore.',
-    accent: 'from-blue-400/25 to-indigo-400/10',
+    bg: 'bg-amber-50 border-amber-100',
+    iconBg: 'bg-amber-100',
   },
 ];
 
 export default function HomePage() {
   return (
     <>
-      {/* Hero — deep navy with gold headline */}
-      <section className="relative bg-maroon text-cream py-20 md:py-28 px-4 overflow-hidden">
-        <div className="absolute -top-24 -right-24 w-80 h-80 rounded-full bg-spice/20 blur-3xl pointer-events-none" />
-        <div className="absolute bottom-0 -left-16 w-64 h-64 rounded-full bg-saffron/10 blur-3xl pointer-events-none" />
+      {/* Hero — vibrant blue gradient (not pitch-dark) */}
+      <section className="relative overflow-hidden bg-gradient-to-br from-blue-600 via-blue-500 to-indigo-600 text-white py-20 md:py-28 px-4">
+        {/* Decorative light orbs */}
+        <div className="absolute -top-20 -right-20 w-72 h-72 rounded-full bg-white/10 blur-3xl pointer-events-none" />
+        <div className="absolute bottom-0 -left-16 w-56 h-56 rounded-full bg-saffron/20 blur-3xl pointer-events-none" />
 
         <div className="relative container mx-auto text-center max-w-4xl">
-          {/* Logo mark */}
+          {/* Logo */}
           <div className="flex justify-center mb-6">
             <Image
               src="/logo.png"
               alt="Indian Restaurants in USA"
-              width={160}
-              height={160}
-              className="rounded-full shadow-2xl shadow-black/40 ring-2 ring-saffron/40"
+              width={150}
+              height={150}
+              className="rounded-full shadow-2xl shadow-black/30 ring-2 ring-saffron/50"
               priority
             />
           </div>
 
-          <p className="text-saffron text-xs font-semibold tracking-[0.18em] uppercase mb-7">
+          <p className="text-blue-100 text-xs font-semibold tracking-[0.18em] uppercase mb-5">
             4,974 Restaurants &middot; 12 Regional Cuisines &middot; 50 States
           </p>
           <h1 className="font-display text-5xl md:text-7xl font-bold leading-[1.05] text-balance">
             Find Indian Food<br />
             <em className="text-saffron not-italic">Anywhere in America</em>
           </h1>
-          <p className="mt-6 text-base md:text-lg text-cream/70 max-w-lg mx-auto leading-relaxed text-balance">
+          <p className="mt-6 text-base md:text-lg text-blue-100 max-w-lg mx-auto leading-relaxed text-balance">
             Regional cuisine classification and Jain filtering you won&apos;t find on Yelp or Google.
           </p>
-          <form action="/search" role="search" className="mt-10 flex max-w-2xl mx-auto rounded-full overflow-hidden shadow-2xl ring-2 ring-saffron/30">
+
+          <form action="/search" role="search" className="mt-10 flex max-w-2xl mx-auto rounded-full overflow-hidden shadow-2xl ring-2 ring-white/20">
             <label htmlFor="hero-search" className="sr-only">Search Indian restaurants</label>
             <input
               id="hero-search"
@@ -99,7 +104,7 @@ export default function HomePage() {
             />
             <button
               type="submit"
-              className="px-8 py-4 bg-saffron hover:bg-turmeric text-maroon font-bold text-sm transition-colors shrink-0"
+              className="px-8 py-4 bg-saffron hover:bg-turmeric text-white font-bold text-sm transition-colors shrink-0"
             >
               Search
             </button>
@@ -114,7 +119,7 @@ export default function HomePage() {
                 <Link
                   key={tag}
                   href={`/indian-food/${tag}`}
-                  className="text-xs px-3 py-1.5 rounded-full bg-white/10 hover:bg-white/20 text-cream/80 hover:text-cream border border-white/10 hover:border-saffron/50 transition-all"
+                  className="text-xs px-3 py-1.5 rounded-full bg-white/15 hover:bg-white/25 text-white border border-white/20 hover:border-saffron/60 transition-all"
                 >
                   {CUISINE_EMOJI[tag]} {c.label}
                 </Link>
@@ -124,8 +129,8 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Stats strip */}
-      <div className="bg-spice text-white py-4 px-4">
+      {/* Stats strip — soft blue */}
+      <div className="bg-blue-700 text-white py-4 px-4">
         <div className="container mx-auto flex flex-wrap justify-center gap-8 text-center">
           {[
             { stat: '4,974', label: 'Restaurants Listed' },
@@ -135,13 +140,13 @@ export default function HomePage() {
           ].map(item => (
             <div key={item.label}>
               <div className="text-xl font-black text-white">{item.stat}</div>
-              <div className="text-xs text-blue-100">{item.label}</div>
+              <div className="text-xs text-blue-200">{item.label}</div>
             </div>
           ))}
         </div>
       </div>
 
-      {/* Browse by cuisine — cool blue cards */}
+      {/* Browse by cuisine */}
       <section className="py-16 px-4 bg-white">
         <div className="container mx-auto">
           <div className="text-center mb-10">
@@ -170,8 +175,8 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Dietary filters — blue gradient bg */}
-      <section className="py-14 px-4 bg-gradient-to-b from-blue-100 to-cream">
+      {/* Dietary filters */}
+      <section className="py-14 px-4 bg-gray-50">
         <div className="container mx-auto">
           <div className="text-center mb-8">
             <h2 className="text-2xl font-bold text-maroon">Filter by Dietary Need</h2>
@@ -198,7 +203,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Top cities — navy-to-royal gradient tiles */}
+      {/* Top cities */}
       <section className="py-14 px-4 bg-white">
         <div className="container mx-auto">
           <div className="text-center mb-8">
@@ -214,7 +219,7 @@ export default function HomePage() {
                 href={metro.href}
                 className="group relative p-5 rounded-xl overflow-hidden text-center transition-all hover:scale-[1.03] hover:shadow-lg"
               >
-                <div className="absolute inset-0 bg-gradient-to-br from-maroon via-spice to-indigo-700 opacity-90 group-hover:opacity-100 transition-opacity" />
+                <div className="absolute inset-0 bg-gradient-to-br from-blue-600 via-blue-500 to-indigo-600 opacity-90 group-hover:opacity-100 transition-opacity" />
                 <div className="relative">
                   <div className="text-2xl mb-1.5">{metro.emoji}</div>
                   <div className="font-bold text-white text-sm leading-tight">{metro.label}</div>
@@ -226,23 +231,24 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Why us — dark navy section */}
-      <section className="py-16 px-4 bg-maroon text-cream">
+      {/* Why us — light cards on white */}
+      <section className="py-16 px-4 bg-gray-50">
         <div className="container mx-auto max-w-4xl">
-          <h2 className="text-2xl font-bold text-center mb-10">
-            Why <span className="text-saffron">Indian Restaurants in USA</span>?
+          <h2 className="text-2xl font-bold text-center text-maroon mb-2">
+            Why <span className="text-spice">Indian Restaurants in USA</span>?
           </h2>
+          <p className="text-center text-gray-400 text-sm mb-10">Data and filters you won&apos;t find on Yelp or Google.</p>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
             {WHY_CARDS.map(card => (
               <div
                 key={card.title}
-                className={`rounded-xl p-6 bg-gradient-to-br ${card.accent} border border-white/10 hover:border-saffron/50 transition-colors`}
+                className={`rounded-xl p-6 border ${card.bg} hover:shadow-md transition-shadow`}
               >
-                <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center mb-4 text-xl">
+                <div className={`w-10 h-10 rounded-full ${card.iconBg} flex items-center justify-center mb-4 text-xl`}>
                   {card.icon}
                 </div>
-                <h3 className="font-bold text-cream mb-3 text-sm">{card.title}</h3>
-                <p className="text-sm text-cream/65 leading-relaxed">{card.body}</p>
+                <h3 className="font-bold text-gray-900 mb-3 text-sm">{card.title}</h3>
+                <p className="text-sm text-gray-500 leading-relaxed">{card.body}</p>
               </div>
             ))}
           </div>
