@@ -64,10 +64,10 @@ export default function HomePage() {
   return (
     <>
       {/* Hero — vibrant blue gradient (not pitch-dark) */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-blue-600 via-blue-500 to-indigo-600 text-white py-20 md:py-28 px-4">
-        {/* Decorative light orbs */}
-        <div className="absolute -top-20 -right-20 w-72 h-72 rounded-full bg-white/10 blur-3xl pointer-events-none" />
-        <div className="absolute bottom-0 -left-16 w-56 h-56 rounded-full bg-saffron/20 blur-3xl pointer-events-none" />
+      <section className="relative overflow-hidden bg-gradient-to-br from-blue-600 via-blue-500 to-indigo-600 text-white py-16 md:py-28 px-4">
+        {/* Decorative light orbs — hidden on mobile to prevent overflow issues */}
+        <div className="hidden md:block absolute -top-20 -right-20 w-72 h-72 rounded-full bg-white/10 blur-3xl pointer-events-none" />
+        <div className="hidden md:block absolute bottom-0 -left-16 w-56 h-56 rounded-full bg-saffron/20 blur-3xl pointer-events-none" />
 
         <div className="relative container mx-auto text-center max-w-4xl">
           {/* Logo */}
@@ -93,25 +93,25 @@ export default function HomePage() {
             Regional cuisine classification and Jain filtering you won&apos;t find on Yelp or Google.
           </p>
 
-          <form action="/search" role="search" className="mt-10 flex max-w-2xl mx-auto rounded-full overflow-hidden shadow-2xl ring-2 ring-white/20">
+          <form action="/search" role="search" className="mt-10 flex w-full max-w-2xl mx-auto rounded-full overflow-hidden shadow-xl ring-2 ring-white/20">
             <label htmlFor="hero-search" className="sr-only">Search Indian restaurants</label>
             <input
               id="hero-search"
               name="q"
               type="search"
-              placeholder="Search by cuisine, city, or restaurant name…"
-              className="flex-1 px-6 py-4 text-gray-900 text-sm focus:outline-none bg-white min-w-0"
+              placeholder="City, cuisine, or name…"
+              className="flex-1 px-4 md:px-6 py-3.5 md:py-4 text-gray-900 text-sm focus:outline-none bg-white min-w-0"
             />
             <button
               type="submit"
-              className="px-8 py-4 bg-saffron hover:bg-turmeric text-white font-bold text-sm transition-colors shrink-0"
+              className="px-5 md:px-8 py-3.5 md:py-4 bg-saffron hover:bg-turmeric text-white font-bold text-sm transition-colors shrink-0 whitespace-nowrap"
             >
               Search
             </button>
           </form>
 
           {/* Quick cuisine chips */}
-          <div className="mt-8 flex flex-wrap gap-2 justify-center">
+          <div className="mt-6 flex flex-wrap gap-2 justify-center px-2">
             {['north-indian', 'south-indian', 'hyderabadi', 'chaat'].map(tag => {
               const c = CUISINES.find(x => x.tag === tag);
               if (!c) return null;
@@ -119,7 +119,7 @@ export default function HomePage() {
                 <Link
                   key={tag}
                   href={`/indian-food/${tag}`}
-                  className="text-xs px-3 py-1.5 rounded-full bg-white/15 hover:bg-white/25 text-white border border-white/20 hover:border-saffron/60 transition-all"
+                  className="text-xs px-3 py-1.5 rounded-full bg-white/15 hover:bg-white/25 text-white border border-white/20 hover:border-saffron/60 transition-all whitespace-nowrap"
                 >
                   {CUISINE_EMOJI[tag]} {c.label}
                 </Link>
