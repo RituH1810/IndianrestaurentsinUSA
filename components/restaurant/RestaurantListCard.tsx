@@ -47,7 +47,7 @@ export function RestaurantListCard({ restaurant, rank }: Props) {
   const isOpen = restaurant.business_status === 'OPERATIONAL';
 
   return (
-    <div className="py-5 flex gap-4 items-start group hover:bg-amber-50/50 -mx-4 px-4 rounded-xl transition-colors">
+    <div className="py-5 flex gap-4 items-start group hover:bg-blue-50/50 -mx-4 px-4 rounded-xl transition-colors">
       {/* Rank */}
       {rank != null && <RankBadge rank={rank} />}
 
@@ -63,7 +63,7 @@ export function RestaurantListCard({ restaurant, rank }: Props) {
             sizes="112px"
           />
         ) : (
-          <div className="h-full flex items-center justify-center bg-gradient-to-br from-saffron/20 to-spice/20">
+          <div className="h-full flex items-center justify-center bg-gradient-to-br from-blue-100 to-indigo-100">
             <span className="text-2xl opacity-40 select-none" aria-hidden="true">🍛</span>
           </div>
         )}

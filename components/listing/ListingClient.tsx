@@ -62,13 +62,13 @@ export function ListingClient({ restaurants, total }: Props) {
   return (
     <div>
       {/* Sticky filter bar */}
-      <div className="sticky top-14 z-30 bg-amber-50/95 backdrop-blur-sm border-b border-amber-200/60 -mx-4 px-4 py-3 mb-2 shadow-sm">
+      <div className="sticky top-14 z-30 bg-cream/95 backdrop-blur-sm border-b border-blue-200/60 -mx-4 px-4 py-3 mb-2 shadow-sm">
         <div className="flex flex-wrap gap-2 items-center">
           {/* Sort */}
           <select
             value={sortBy}
             onChange={e => setSortBy(e.target.value as SortKey)}
-            className="text-sm border border-amber-200 rounded-full px-3 py-1.5 bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-saffron/50 cursor-pointer shadow-sm"
+            className="text-sm border border-blue-200 rounded-full px-3 py-1.5 bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-spice/30 cursor-pointer shadow-sm"
           >
             <option value="recommended">Best Match</option>
             <option value="rating">Highest Rated</option>
@@ -76,7 +76,7 @@ export function ListingClient({ restaurants, total }: Props) {
             <option value="name">A to Z</option>
           </select>
 
-          <div className="w-px h-5 bg-amber-200" />
+          <div className="w-px h-5 bg-blue-200" />
 
           {/* Rating */}
           {([4.0, 4.5] as number[]).map(r => (
@@ -86,7 +86,7 @@ export function ListingClient({ restaurants, total }: Props) {
               className={`text-xs rounded-full px-3 py-1.5 border font-semibold transition-all shadow-sm ${
                 minRating === r
                   ? 'bg-maroon text-white border-maroon shadow-maroon/20 shadow-md'
-                  : 'bg-white text-gray-600 border-amber-200 hover:border-saffron hover:text-spice hover:bg-amber-50'
+                  : 'bg-white text-gray-600 border-blue-200 hover:border-spice hover:text-spice hover:bg-blue-50'
               }`}
             >
               ★ {r}+
@@ -101,7 +101,7 @@ export function ListingClient({ restaurants, total }: Props) {
               className={`text-xs rounded-full px-3 py-1.5 border font-semibold transition-all shadow-sm ${
                 cuisineFilter === c.tag
                   ? 'bg-spice text-white border-spice shadow-spice/20 shadow-md'
-                  : 'bg-white text-gray-600 border-amber-200 hover:border-saffron hover:text-spice hover:bg-amber-50'
+                  : 'bg-white text-gray-600 border-blue-200 hover:border-spice hover:text-spice hover:bg-blue-50'
               }`}
             >
               {c.label}
@@ -116,7 +116,7 @@ export function ListingClient({ restaurants, total }: Props) {
               className={`text-xs rounded-full px-3 py-1.5 border font-semibold transition-all shadow-sm ${
                 dietaryFilter === d.tag
                   ? 'bg-emerald-600 text-white border-emerald-600 shadow-emerald-200 shadow-md'
-                  : 'bg-white text-gray-600 border-amber-200 hover:border-green-400 hover:text-emerald-700 hover:bg-emerald-50'
+                  : 'bg-white text-gray-600 border-blue-200 hover:border-green-400 hover:text-emerald-700 hover:bg-emerald-50'
               }`}
             >
               {d.label}

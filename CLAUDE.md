@@ -16,11 +16,11 @@ The Next.js app lives at the **repo root**, not in a subdirectory. The `web/` fo
 ## Color palette
 | Token | Hex | Usage |
 |-------|-----|-------|
-| `maroon` | `#7A1F1F` | Header, hero, dark sections |
-| `spice` | `#C1440E` | Buttons, hover accents |
-| `saffron` | `#E08A1E` | Links, highlights, star color |
-| `turmeric` | `#F4B942` | Badges, secondary accents |
-| `cream` | `#FBF6EE` | Page background |
+| `maroon` | `#1B3A6B` | Header, hero, dark sections (deep navy) |
+| `spice` | `#2563EB` | Buttons, hover accents (royal blue) |
+| `saffron` | `#E08A1E` | Links, highlights, star color (gold — unchanged) |
+| `turmeric` | `#F4B942` | Badges, secondary accents (unchanged) |
+| `cream` | `#EFF6FF` | Page background (light sky blue) |
 
 ## Typography
 - **Body:** DM Sans (`--font-dm-sans`) — used everywhere

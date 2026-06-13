@@ -44,7 +44,7 @@ export function RestaurantCard({ restaurant }: Props) {
             </div>
           </>
         ) : (
-          <div className="h-full flex items-center justify-center bg-gradient-to-br from-cream to-saffron/10">
+          <div className="h-full flex items-center justify-center bg-gradient-to-br from-blue-100 to-indigo-50">
             <span className="text-5xl opacity-20 select-none" aria-hidden="true">🍛</span>
           </div>
         )}

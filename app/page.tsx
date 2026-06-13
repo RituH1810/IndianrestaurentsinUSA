@@ -40,28 +40,27 @@ const WHY_CARDS = [
     icon: '🗺️',
     title: 'Regional Cuisine Classification',
     body: "Every listing is classified by regional Indian cuisine — North Indian, South Indian, Hyderabadi, Gujarati, and more. This data doesn't exist anywhere else.",
-    accent: 'from-saffron/20 to-turmeric/10',
+    accent: 'from-saffron/25 to-turmeric/10',
   },
   {
     icon: '🙏',
     title: 'Jain & Dietary Filtering',
     body: 'The only directory that lets you filter for Jain-friendly restaurants (no onion, garlic, or root vegetables). Also covers vegan, pure-veg, halal, and gluten-free.',
-    accent: 'from-violet-500/20 to-emerald-500/10',
+    accent: 'from-violet-400/25 to-emerald-400/10',
   },
   {
     icon: '💎',
     title: 'Hidden Gems',
     body: 'Our algorithm surfaces highly-rated restaurants with fewer than 200 reviews — the authentic neighbourhood spots that chains and food blogs ignore.',
-    accent: 'from-spice/20 to-saffron/10',
+    accent: 'from-blue-400/25 to-indigo-400/10',
   },
 ];
 
 export default function HomePage() {
   return (
     <>
-      {/* Hero */}
+      {/* Hero — deep navy with gold headline */}
       <section className="relative bg-maroon text-cream py-20 md:py-28 px-4 overflow-hidden">
-        {/* decorative circles */}
         <div className="absolute -top-24 -right-24 w-80 h-80 rounded-full bg-spice/20 blur-3xl pointer-events-none" />
         <div className="absolute bottom-0 -left-16 w-64 h-64 rounded-full bg-saffron/10 blur-3xl pointer-events-none" />
 
@@ -87,7 +86,7 @@ export default function HomePage() {
             />
             <button
               type="submit"
-              className="px-8 py-4 bg-saffron hover:bg-spice text-white font-bold text-sm transition-colors shrink-0"
+              className="px-8 py-4 bg-saffron hover:bg-turmeric text-maroon font-bold text-sm transition-colors shrink-0"
             >
               Search
             </button>
@@ -102,7 +101,7 @@ export default function HomePage() {
                 <Link
                   key={tag}
                   href={`/indian-food/${tag}`}
-                  className="text-xs px-3 py-1.5 rounded-full bg-white/10 hover:bg-white/20 text-cream/80 hover:text-cream border border-white/10 hover:border-saffron/40 transition-all"
+                  className="text-xs px-3 py-1.5 rounded-full bg-white/10 hover:bg-white/20 text-cream/80 hover:text-cream border border-white/10 hover:border-saffron/50 transition-all"
                 >
                   {CUISINE_EMOJI[tag]} {c.label}
                 </Link>
@@ -112,7 +111,24 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Browse by cuisine — vibrant emoji cards */}
+      {/* Stats strip */}
+      <div className="bg-spice text-white py-4 px-4">
+        <div className="container mx-auto flex flex-wrap justify-center gap-8 text-center">
+          {[
+            { stat: '4,974', label: 'Restaurants Listed' },
+            { stat: '12', label: 'Regional Cuisines' },
+            { stat: '50', label: 'States Covered' },
+            { stat: '5', label: 'Dietary Filters' },
+          ].map(item => (
+            <div key={item.label}>
+              <div className="text-xl font-black text-white">{item.stat}</div>
+              <div className="text-xs text-blue-100">{item.label}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Browse by cuisine — cool blue cards */}
       <section className="py-16 px-4 bg-white">
         <div className="container mx-auto">
           <div className="text-center mb-10">
@@ -126,7 +142,7 @@ export default function HomePage() {
               <Link
                 key={c.tag}
                 href={`/indian-food/${c.tag}`}
-                className="group p-4 rounded-xl border-2 border-amber-100 bg-gradient-to-br from-amber-50 to-orange-50/50 hover:from-saffron/20 hover:to-spice/10 hover:border-saffron/60 transition-all shadow-sm hover:shadow-md hover:-translate-y-0.5"
+                className="group p-4 rounded-xl border-2 border-blue-100 bg-gradient-to-br from-blue-50 to-indigo-50/60 hover:from-blue-100 hover:to-sky-100 hover:border-spice/40 transition-all shadow-sm hover:shadow-md hover:-translate-y-0.5"
               >
                 <div className="text-2xl mb-2.5">{CUISINE_EMOJI[c.tag] ?? '🍽️'}</div>
                 <div className="font-semibold text-gray-800 group-hover:text-spice transition-colors text-sm">
@@ -141,8 +157,8 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Dietary filters — rich background */}
-      <section className="py-14 px-4 bg-gradient-to-b from-maroon/5 to-amber-50">
+      {/* Dietary filters — blue gradient bg */}
+      <section className="py-14 px-4 bg-gradient-to-b from-blue-100 to-cream">
         <div className="container mx-auto">
           <div className="text-center mb-8">
             <h2 className="text-2xl font-bold text-maroon">Filter by Dietary Need</h2>
@@ -169,7 +185,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Top cities — rich gradient cards */}
+      {/* Top cities — navy-to-royal gradient tiles */}
       <section className="py-14 px-4 bg-white">
         <div className="container mx-auto">
           <div className="text-center mb-8">
@@ -185,11 +201,11 @@ export default function HomePage() {
                 href={metro.href}
                 className="group relative p-5 rounded-xl overflow-hidden text-center transition-all hover:scale-[1.03] hover:shadow-lg"
               >
-                <div className="absolute inset-0 bg-gradient-to-br from-maroon via-spice to-maroon opacity-90 group-hover:opacity-100 transition-opacity" />
+                <div className="absolute inset-0 bg-gradient-to-br from-maroon via-spice to-indigo-700 opacity-90 group-hover:opacity-100 transition-opacity" />
                 <div className="relative">
                   <div className="text-2xl mb-1.5">{metro.emoji}</div>
-                  <div className="font-bold text-cream text-sm leading-tight">{metro.label}</div>
-                  <div className="text-xs text-cream/60 mt-0.5">{metro.sub}</div>
+                  <div className="font-bold text-white text-sm leading-tight">{metro.label}</div>
+                  <div className="text-xs text-blue-200 mt-0.5">{metro.sub}</div>
                 </div>
               </Link>
             ))}
@@ -197,7 +213,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Why us — dark section with icon cards */}
+      {/* Why us — dark navy section */}
       <section className="py-16 px-4 bg-maroon text-cream">
         <div className="container mx-auto max-w-4xl">
           <h2 className="text-2xl font-bold text-center mb-10">
@@ -207,9 +223,9 @@ export default function HomePage() {
             {WHY_CARDS.map(card => (
               <div
                 key={card.title}
-                className={`rounded-xl p-6 bg-gradient-to-br ${card.accent} border border-white/10 hover:border-saffron/40 transition-colors`}
+                className={`rounded-xl p-6 bg-gradient-to-br ${card.accent} border border-white/10 hover:border-saffron/50 transition-colors`}
               >
-                <div className="w-10 h-10 rounded-full bg-saffron/20 flex items-center justify-center mb-4 text-xl">
+                <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center mb-4 text-xl">
                   {card.icon}
                 </div>
                 <h3 className="font-bold text-cream mb-3 text-sm">{card.title}</h3>

@@ -9,11 +9,11 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        maroon: "#7A1F1F",
-        spice: "#C1440E",
-        saffron: "#E08A1E",
-        turmeric: "#F4B942",
-        cream: "#FBF6EE",
+        maroon: "#1B3A6B",   // deep navy (was dark red)
+        spice: "#2563EB",    // royal blue (was spice red)
+        saffron: "#E08A1E",  // gold — unchanged, pops on navy
+        turmeric: "#F4B942", // amber — unchanged, accent
+        cream: "#EFF6FF",    // light sky blue (was warm cream)
       },
       fontFamily: {
         sans: ["var(--font-dm-sans)", "system-ui", "sans-serif"],
