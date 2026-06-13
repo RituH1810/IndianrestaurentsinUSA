@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import Image from 'next/image';
 import { CUISINES, DIETARY } from '@/lib/taxonomy';
 
 const FEATURED_METROS = [
@@ -65,6 +66,18 @@ export default function HomePage() {
         <div className="absolute bottom-0 -left-16 w-64 h-64 rounded-full bg-saffron/10 blur-3xl pointer-events-none" />
 
         <div className="relative container mx-auto text-center max-w-4xl">
+          {/* Logo mark */}
+          <div className="flex justify-center mb-6">
+            <Image
+              src="/logo.png"
+              alt="Indian Restaurants in USA"
+              width={160}
+              height={160}
+              className="rounded-full shadow-2xl shadow-black/40 ring-2 ring-saffron/40"
+              priority
+            />
+          </div>
+
           <p className="text-saffron text-xs font-semibold tracking-[0.18em] uppercase mb-7">
             4,974 Restaurants &middot; 12 Regional Cuisines &middot; 50 States
           </p>

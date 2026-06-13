@@ -1,6 +1,7 @@
 'use client';
 import { useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 
 const NAV_LINKS = [
   { label: 'Cuisines', href: '/indian-food' },
@@ -16,9 +17,16 @@ export default function Header() {
   return (
     <header className="bg-maroon text-cream sticky top-0 z-40 border-b border-spice/30">
       <nav className="container mx-auto px-4 h-14 flex items-center justify-between gap-6">
-        {/* Wordmark */}
+        {/* Logo */}
         <Link href="/" className="shrink-0 flex items-center gap-2.5">
-          <span className="w-2 h-2 rounded-full bg-saffron flex-shrink-0" />
+          <Image
+            src="/logo.png"
+            alt="Indian Restaurants in USA"
+            width={36}
+            height={36}
+            className="rounded-full object-cover"
+            priority
+          />
           <span className="font-bold text-sm tracking-tight leading-none">
             Indian Restaurants <span className="text-saffron">in USA</span>
           </span>
