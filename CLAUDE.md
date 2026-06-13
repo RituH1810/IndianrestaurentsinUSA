@@ -8,6 +8,7 @@ Programmatic SEO directory of Indian restaurants across the USA at **indianresta
 - **Database:** Prisma 5 + Supabase Postgres (production)
 - **Deployment:** GitHub → Vercel (auto-deploy on push to `main`)
 - **Data source:** Outscraper Excel exports → `data/` directory
+- **Map:** Leaflet + OpenStreetMap (free, no API key needed)
 
 ## Project root
 The Next.js app lives at the **repo root**, not in a subdirectory. The `web/` folder is an empty artifact — ignore it.
@@ -15,25 +16,39 @@ The Next.js app lives at the **repo root**, not in a subdirectory. The `web/` fo
 ## Color palette
 | Token | Hex | Usage |
 |-------|-----|-------|
-| `maroon` | `#7A1F1F` | Header background, headings |
-| `spice` | `#C1440E` | Buttons, accents |
-| `saffron` | `#E08A1E` | Links, highlights |
+| `maroon` | `#7A1F1F` | Header, hero, dark sections |
+| `spice` | `#C1440E` | Buttons, hover accents |
+| `saffron` | `#E08A1E` | Links, highlights, star color |
 | `turmeric` | `#F4B942` | Badges, secondary accents |
 | `cream` | `#FBF6EE` | Page background |
+
+## Typography
+- **Body:** DM Sans (`--font-dm-sans`) — used everywhere
+- **Display:** Fraunces (`--font-fraunces`) — serif, used only for hero h1 (`font-display` Tailwind class)
 
 ## URL structure
 ```
 /                                    Homepage
 /restaurants/[slug]                  Individual restaurant
 /usa/[state]/indian-restaurants      State listing
-/usa/[state]/[city]/indian-restaurants  City listing
+/usa/[state]/[city]/indian-restaurants  City listing (TripAdvisor-style with filter bar)
 /indian-food/[cuisine]               Cuisine filter
 /indian-restaurants/[diet]           Dietary filter
 /best-indian-restaurants             Top picks
 /guides/[slug]                       Editorial guides
-/map                                 Map view
+/map                                 Interactive Leaflet map
 /search                              Search (dynamic)
 ```
+
+## Key components
+| Component | Location | Purpose |
+|-----------|----------|---------|
+| `ListingClient` | `components/listing/ListingClient.tsx` | Client-side filter bar + ranked list (TripAdvisor style) |
+| `RestaurantListCard` | `components/restaurant/RestaurantListCard.tsx` | Horizontal ranked card with photo, rating, badges, status |
+| `RestaurantCard` | `components/restaurant/RestaurantCard.tsx` | Grid card with photo overlay (homepage/cuisine pages) |
+| `MapClient` | `components/map/MapClient.tsx` | Leaflet map, dynamic-imported with `ssr: false` |
+| `Header` | `components/layout/Header.tsx` | Sticky maroon header with saffron-dot wordmark |
+| `Footer` | `components/layout/Footer.tsx` | Dark footer with cuisine/dietary/company links |
 
 ## Database
 - **Supabase project ref:** `cumxyszbuyfykqwqgyxo`
@@ -47,10 +62,11 @@ The Next.js app lives at the **repo root**, not in a subdirectory. The `web/` fo
 ```
 DATABASE_URL    Supabase session pooler URL (port 5432)
 DIRECT_URL      Supabase direct URL (port 5432)
-ANTHROPIC_API_KEY   For cuisine/dietary classification scripts
-NEXT_PUBLIC_GOOGLE_MAPS_KEY   For /map page
+ANTHROPIC_API_KEY   For AI cuisine/dietary classification scripts
 NEXT_PUBLIC_SITE_URL=https://www.indianrestaurantsinusa.com
 ```
+
+**Note:** `NEXT_PUBLIC_GOOGLE_MAPS_KEY` is no longer needed — map uses free Leaflet/OpenStreetMap.
 
 **Key Vercel setting:** Use port `5432` (session mode) — NOT port `6543` (transaction mode). Transaction mode causes prepared statement conflicts during SSG builds.
 
@@ -62,20 +78,25 @@ Run scripts in order from the project root using `npx tsx scripts/<name>.ts`:
 | 1 | `ingest.ts [file.xlsx]` | Read Outscraper Excel → upsert to DB |
 | 2 | `deduplicate.ts` | Merge duplicate restaurants |
 | 3 | `geo-enrich.ts` | Fill state_abbr, metro fields |
-| 4 | `classify-cuisine.ts` | AI cuisine tagging (needs ANTHROPIC_API_KEY) |
-| 5 | `classify-dietary.ts` | AI dietary tagging (needs ANTHROPIC_API_KEY) |
+| 3b | `keyword-tag.ts` | Keyword-based cuisine/dietary tagging (no API key, fast) |
+| 4 | `classify-cuisine.ts` | AI cuisine tagging — more accurate (needs ANTHROPIC_API_KEY) |
+| 5 | `classify-dietary.ts` | AI dietary tagging — more accurate (needs ANTHROPIC_API_KEY) |
 | 6 | `ai-enrich.ts` | AI descriptions (needs ANTHROPIC_API_KEY) |
 | 7 | `generate-slugs.ts` | Create URL slugs |
-| 8 | `build-search-index.ts` | Postgres full-text search (skip for SQLite) |
+| 8 | `build-search-index.ts` | Postgres full-text search |
 | 9 | `score-publish-priority.ts` | Score restaurants by quality signals |
 | 10 | `initial-publish.ts [N]` | Mark top N as published (omit N = publish all) |
 
 To load a specific Excel file: `npx tsx scripts/ingest.ts ./data/filename.xlsx`
 
+Run `keyword-tag.ts` first (no API key) for instant tagging, then AI scripts later for accuracy.
+
 ## Current data
 - **4,974 restaurants** in Supabase, all published
+- **1,063** restaurants have cuisine tags (keyword-based)
+- **167** restaurants have dietary tags (keyword-based)
 - Cities: nationwide coverage from Outscraper export
-- AI enrichment (cuisine/dietary tags, descriptions) pending — needs ANTHROPIC_API_KEY
+- AI enrichment (better cuisine/dietary tags + descriptions) pending — add ANTHROPIC_API_KEY and run scripts 4–6
 
 ## Deployment
 **Never deploy from the terminal.** Push to `main` → Vercel auto-deploys.
@@ -101,14 +122,20 @@ Fix: Change `DATABASE_URL` in Vercel to port `5432` (session mode), remove `?pgb
 2. Check `SELECT COUNT(*) FROM "Restaurant" WHERE is_published = true;`
 3. If 0, run `UPDATE "Restaurant" SET is_published = true;` then redeploy
 
+### Filter pages show 0 restaurants (cuisine/dietary)
+Run `npx tsx scripts/keyword-tag.ts` to tag restaurants with keyword matching (no API key needed), then redeploy.
+
 ### 404 on Vercel deployment URL
 Check Vercel → Settings → General → Framework Preset = **Next.js** (not "Other").
 
 ### Local `npm run dev` shows no data
 The local `.env` needs real Supabase credentials. The schema is `postgresql` — SQLite is not supported.
 
+### Map page shows error
+Map uses Leaflet/OpenStreetMap — no API key required. If it shows blank, check that `leaflet` and `react-leaflet@4` are installed (`npm install leaflet react-leaflet@4 @types/leaflet`). Note: `react-leaflet@5` requires React 19; this project uses React 18 so pin to v4.
+
 ## What's next
-- Run AI enrichment scripts once ANTHROPIC_API_KEY is available (adds cuisine tags, dietary tags, descriptions)
-- Add more Outscraper city files and re-run the pipeline
-- Set up Google Maps API key for the `/map` page
-- Apply frontend-design skill for UI refresh
+- Add `ANTHROPIC_API_KEY` and run `classify-cuisine.ts`, `classify-dietary.ts`, `ai-enrich.ts` for accurate AI tagging on all 4,974 restaurants
+- Add more Outscraper city/state Excel files and re-run the full pipeline
+- Implement state listing page with the same `ListingClient` filter bar
+- Add cuisine hub pages (`/indian-food/[cuisine]`) to also use `ListingClient`
