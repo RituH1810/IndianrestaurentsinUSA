@@ -14,14 +14,24 @@ const prisma = new PrismaClient();
 const BATCH_SIZE = 100;
 
 function findExcelFile(): string {
-  // Look in data/ directory at the project root (alongside scripts/, app/, etc.)
+  // Accept an explicit file path via CLI arg: npx tsx scripts/ingest.ts ./data/file.xlsx
+  const cliArg = process.argv[2];
+  if (cliArg) {
+    const p = path.resolve(cliArg);
+    if (!fs.existsSync(p)) throw new Error(`File not found: ${p}`);
+    console.log(`Using specified file: ${p}`);
+    return p;
+  }
+  // Fall back: pick the most recently modified .xlsx in data/
   const dataDir = path.join(__dirname, '..', 'data');
   const rootDir = path.join(__dirname, '..');
   const searchDir = fs.existsSync(dataDir) ? dataDir : rootDir;
-  const files = fs.readdirSync(searchDir);
-  const xlsx = files.find(f => f.endsWith('.xlsx') || f.endsWith('.xls'));
-  if (!xlsx) throw new Error(`No Excel file found in ${searchDir}`);
-  const p = path.join(searchDir, xlsx);
+  const files = fs.readdirSync(searchDir)
+    .filter(f => f.endsWith('.xlsx') || f.endsWith('.xls'))
+    .map(f => ({ name: f, mtime: fs.statSync(path.join(searchDir, f)).mtime }))
+    .sort((a, b) => b.mtime.getTime() - a.mtime.getTime());
+  if (!files.length) throw new Error(`No Excel file found in ${searchDir}`);
+  const p = path.join(searchDir, files[0].name);
   console.log(`Found data file: ${p}`);
   return p;
 }
