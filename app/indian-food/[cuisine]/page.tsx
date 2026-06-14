@@ -4,7 +4,7 @@ import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { prisma } from '@/lib/prisma';
 import { CUISINES, getCuisineLabel } from '@/lib/taxonomy';
-import { RestaurantGrid } from '@/components/restaurant/RestaurantGrid';
+import { CuisineNearbyList } from '@/components/restaurant/CuisineNearbyList';
 import { BreadcrumbJsonLd, ItemListJsonLd } from '@/components/seo/JsonLd';
 import { cuisineMeta } from '@/lib/seo';
 
@@ -36,6 +36,8 @@ export default async function CuisineHubPage({ params }: { params: { cuisine: st
     rating: number | null; reviews: number | null; photo: string | null;
     cuisine_tags: string | null; dietary_tags: string | null;
     is_hidden_gem: boolean; description: string | null;
+    phone: string | null; website: string | null; business_status: string | null;
+    latitude: number | null; longitude: number | null;
   }[] = [];
 
   try {
@@ -47,6 +49,8 @@ export default async function CuisineHubPage({ params }: { params: { cuisine: st
         rating: true, reviews: true, photo: true,
         cuisine_tags: true, dietary_tags: true,
         is_hidden_gem: true, description: true,
+        phone: true, website: true, business_status: true,
+        latitude: true, longitude: true,
       },
     });
   } catch { /* DB not ready */ }
@@ -94,7 +98,7 @@ export default async function CuisineHubPage({ params }: { params: { cuisine: st
           ))}
         </div>
 
-        <RestaurantGrid
+        <CuisineNearbyList
           restaurants={restaurants}
           emptyMessage={`No ${cuisineInfo.label} restaurants found yet. Run classify-cuisine.ts to tag restaurants.`}
         />
