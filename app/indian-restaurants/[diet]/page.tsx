@@ -4,7 +4,7 @@ import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { prisma } from '@/lib/prisma';
 import { DIETARY, getDietaryLabel } from '@/lib/taxonomy';
-import { CuisineNearbyList } from '@/components/restaurant/CuisineNearbyList';
+import { FilterableGrid } from '@/components/restaurant/FilterableGrid';
 import { BreadcrumbJsonLd, ItemListJsonLd } from '@/components/seo/JsonLd';
 import { dietaryMeta } from '@/lib/seo';
 
@@ -94,7 +94,7 @@ export default async function DietaryHubPage({ params }: { params: { diet: strin
           ))}
         </div>
 
-        <CuisineNearbyList
+        <FilterableGrid
           restaurants={restaurants}
           emptyMessage={`No ${dietInfo.label} restaurants found yet. Run classify-dietary.ts to tag restaurants.`}
         />

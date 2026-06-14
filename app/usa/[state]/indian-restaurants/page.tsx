@@ -3,7 +3,7 @@ export const revalidate = 3600; // re-fetch from DB every hour
 import Link from 'next/link';
 import { prisma } from '@/lib/prisma';
 import { slugToLabel, cityNameToSlug } from '@/lib/utils';
-import { RestaurantGrid } from '@/components/restaurant/RestaurantGrid';
+import { FilterableGrid } from '@/components/restaurant/FilterableGrid';
 import { BreadcrumbJsonLd, ItemListJsonLd } from '@/components/seo/JsonLd';
 import { stateMeta } from '@/lib/seo';
 import { CUISINES } from '@/lib/taxonomy';
@@ -24,6 +24,7 @@ export default async function StateHubPage({ params }: { params: { state: string
     rating: number | null; reviews: number | null; photo: string | null;
     cuisine_tags: string | null; dietary_tags: string | null;
     is_hidden_gem: boolean; description: string | null;
+    latitude: number | null; longitude: number | null;
   }[] = [];
 
   let cities: { city: string; _count: { city: number } }[] = [];
@@ -39,6 +40,7 @@ export default async function StateHubPage({ params }: { params: { state: string
           rating: true, reviews: true, photo: true,
           cuisine_tags: true, dietary_tags: true,
           is_hidden_gem: true, description: true,
+          latitude: true, longitude: true,
         },
       }),
       prisma.restaurant.groupBy({
@@ -118,7 +120,7 @@ export default async function StateHubPage({ params }: { params: { state: string
         <h2 className="text-xl font-semibold text-gray-800 mb-5">
           Top Indian Restaurants in {stateName}
         </h2>
-        <RestaurantGrid
+        <FilterableGrid
           restaurants={restaurants}
           emptyMessage={`Run the data pipeline to see Indian restaurants in ${stateName}.`}
         />

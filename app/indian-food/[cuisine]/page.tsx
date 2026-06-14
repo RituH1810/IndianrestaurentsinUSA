@@ -4,7 +4,7 @@ import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { prisma } from '@/lib/prisma';
 import { CUISINES, getCuisineLabel } from '@/lib/taxonomy';
-import { CuisineNearbyList } from '@/components/restaurant/CuisineNearbyList';
+import { FilterableGrid } from '@/components/restaurant/FilterableGrid';
 import { BreadcrumbJsonLd, ItemListJsonLd } from '@/components/seo/JsonLd';
 import { cuisineMeta } from '@/lib/seo';
 
@@ -98,7 +98,7 @@ export default async function CuisineHubPage({ params }: { params: { cuisine: st
           ))}
         </div>
 
-        <CuisineNearbyList
+        <FilterableGrid
           restaurants={restaurants}
           emptyMessage={`No ${cuisineInfo.label} restaurants found yet. Run classify-cuisine.ts to tag restaurants.`}
         />
