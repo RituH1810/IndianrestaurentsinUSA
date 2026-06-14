@@ -51,13 +51,16 @@ The Next.js app lives at the **repo root**, not in a subdirectory. The `web/` fo
 ## Key components
 | Component | Location | Purpose |
 |-----------|----------|---------|
-| `ListingClient` | `components/listing/ListingClient.tsx` | Client-side filter bar + ranked list (TripAdvisor style) |
-| `RestaurantListCard` | `components/restaurant/RestaurantListCard.tsx` | **`'use client'`** — horizontal ranked card — medal ranks for top 3, cuisine/dietary badges, optional `distanceMiles` prop. Must stay a client component (has onClick handlers). |
-| `RestaurantCard` | `components/restaurant/RestaurantCard.tsx` | Grid card with photo overlay (cuisine/state pages) |
+| `FilterableGrid` | `components/restaurant/FilterableGrid.tsx` | **`'use client'`** — unified listing component used on ALL listing pages. Sticky filter bar (rating ★, cuisine pills, dietary pills, Clear all ✕), client-side pagination (30/page = 10 rows × 3 cols), silent location sort. Exports `FilterableRestaurant` type. |
+| `NearMeClient` | `components/restaurant/NearMeClient.tsx` | **`'use client'`** — same filter bar + pagination as `FilterableGrid` but no location re-sort (SQL already ordered by distance). Used on `/restaurants/near-me`. |
+| `RestaurantCard` | `components/restaurant/RestaurantCard.tsx` | Grid card with photo overlay — used inside `FilterableGrid` and `NearMeClient` |
+| `RestaurantListCard` | `components/restaurant/RestaurantListCard.tsx` | **`'use client'`** — horizontal ranked card, optional `distanceMiles` prop. Must stay a client component (has onClick handlers). No longer used on listing pages. |
+| `ListingClient` | `components/listing/ListingClient.tsx` | Legacy filter bar + ranked list — kept for reference but not used on any page |
 | `MapClient` | `components/map/MapClient.tsx` | Leaflet map, dynamic-imported with `ssr: false` |
 | `Header` | `components/layout/Header.tsx` | **White** sticky header with logo + gray nav links + blue hover |
 | `Footer` | `components/layout/Footer.tsx` | Dark gray-900 footer with cuisine/dietary/company/Instagram links |
 | `Badge` | `components/ui/Badge.tsx` | Rounded-full pills — cuisine (saffron/30 + maroon text), dietary (emerald-100) |
+| `CookieBanner` | `components/ui/CookieBanner.tsx` | **`'use client'`** — fixed bottom bar on first visit. "Accept all" sets `cookie_consent='all'`, "Essential only" sets `cookie_consent='essential'` in localStorage. Never shows again after choice. |
 | `NearMeButton` | `components/filters/NearMeButton.tsx` | **`'use client'`** — pill button, requests geolocation → redirects to `/restaurants/near-me`. Two variants: `hero` (white border) and `default` (gray border). |
 | `InstagramFeed` | `components/instagram/InstagramFeed.tsx` | **`'use client'`** — renders Instagram blockquote embeds + loads embed.js via `next/script lazyOnload`. |
 | `InstagramHomeBanner` | `components/instagram/InstagramHomeBanner.tsx` | Homepage Instagram section with profile header + 3 embedded reels. |
@@ -115,21 +118,42 @@ Run `keyword-tag.ts` first (no API key) for instant tagging, then AI scripts lat
 - Cities: nationwide coverage from Outscraper export
 - AI enrichment (better cuisine/dietary tags + descriptions) pending — add ANTHROPIC_API_KEY and run scripts 4–6
 
-## ISR strategy — no generateStaticParams on DB pages
-**All dynamic pages that query the DB use lazy ISR (no `generateStaticParams`).**
+## Rendering strategy — force-dynamic on all DB pages
+**All pages that query the DB use `export const dynamic = 'force-dynamic'`.**
 
-Pages affected: `restaurants/[slug]`, `usa/[state]/indian-restaurants`, `usa/[state]/[city]/indian-restaurants`, `indian-food/[cuisine]`, `indian-restaurants/[diet]`.
+Pages: `app/usa/page.tsx`, `restaurants/[slug]`, `usa/[state]/indian-restaurants`, `usa/[state]/[city]/indian-restaurants`, `indian-food/[cuisine]`, `indian-restaurants/[diet]`, `best-indian-restaurants`, `restaurants/near-me`, `search`.
 
-Why: `generateStaticParams` pre-builds all pages at deploy time. If Supabase is paused when Vercel builds, every page caches empty results. Without it, pages render on the **first request** (ISR via `revalidate = 3600`) so they always read live DB data. Deploys are also faster.
+Why `force-dynamic` instead of `revalidate = 3600`: ISR with revalidate caches the **first response** at the Vercel edge for up to 1 hour. If Supabase is paused when that first request lands, the empty result is frozen for the full hour — users see blank pages even after Supabase resumes. `force-dynamic` bypasses the edge cache entirely and always reads live from Supabase.
 
-Do NOT add `generateStaticParams` back to these pages.
+**Do NOT add `generateStaticParams` or `revalidate` back to these pages.**
 
 ## "Use my location" / Near Me search
 - `NearMeButton` (`components/filters/NearMeButton.tsx`) — browser Geolocation API → redirects to `/restaurants/near-me?lat=X&lng=Y`
-- `/restaurants/near-me` page runs a **Haversine SQL query** via `prisma.$queryRaw` to find restaurants within **25 miles**, sorted by distance
+- `/restaurants/near-me` server page runs a **Haversine SQL query** via `prisma.$queryRaw` (up to 300 results within **25 miles**, ordered by distance). Maps rows to `FilterableRestaurant[]` and passes to `NearMeClient`.
+- `NearMeClient` — 3×3 grid + sticky filter bar + pagination (30/page). Does **not** re-sort by location (SQL already ordered by distance). Always shows "Sorted by distance" indicator.
 - Reverse-geocode for display heading done server-side via Nominatim (OpenStreetMap, free, no API key)
-- `RestaurantListCard` accepts optional `distanceMiles` prop — shows "X mi away" in blue next to city/state
 - Requires `latitude`/`longitude` fields populated in DB (Outscraper exports include these)
+
+## Listing pages — FilterableGrid
+All listing pages (cuisine, dietary, state, city, best restaurants) use `FilterableGrid`:
+- **Layout:** 3×3 `RestaurantCard` grid, 30 results per page (10 rows × 3 cols)
+- **Sticky filter bar:** rating (★4.0+, ★4.5+), cuisine pills, dietary pills — each active chip shows `×` to deselect. "Clear all ✕" appears when any filter is active.
+- **Pagination:** client-side, numbered buttons + ellipsis collapse + Prev/Next. `goToPage()` scrolls to top.
+- **Location sort:** silent `navigator.geolocation.getCurrentPosition()` on mount (4 sec timeout, 5 min cache). If granted, re-sorts by Haversine distance and shows "Sorted by distance" indicator. Filters reset to page 1 when changed.
+- **Data fetched server-side**, passed as props — no artificial `take` cap on any listing page.
+
+## Search page
+- **3×3 grid** (RestaurantGrid), **30 per page** (10 rows × 3 cols)
+- **Server-side pagination** via `?page=` URL param — count and results fetched in parallel with `Promise.all`
+- `export const dynamic = 'force-dynamic'` — never cached; each `?q=&page=` combo always re-fetches
+- Pagination controls: numbered buttons + ellipsis + Prev/Next, only shown when `totalPages > 1`
+
+## Cookie consent
+- `CookieBanner` (`components/ui/CookieBanner.tsx`) — fixed bottom bar, shown on first visit
+- "Accept all" → `localStorage.setItem('cookie_consent', 'all')`, hides banner permanently
+- "Essential only" → `localStorage.setItem('cookie_consent', 'essential')`, hides banner permanently
+- Gracefully handles private/incognito mode (localStorage access failure caught silently)
+- To test: DevTools → Application → Local Storage → delete `cookie_consent` → refresh
 
 ## Instagram integration
 - `/instagram` page — gradient hero, 3 embedded reels, follow CTA
@@ -180,11 +204,11 @@ Fix: Change `DATABASE_URL` in Vercel to port `5432` (session mode), remove `?pgb
 2. Check `SELECT COUNT(*) FROM "Restaurant" WHERE is_published = true;`
 3. If 0, run `UPDATE "Restaurant" SET is_published = true;` then redeploy
 
-### Filter/city/cuisine pages show 0 restaurants
-Since `generateStaticParams` was removed, pages now render on first request — they should always show live data as long as Supabase is awake. If you still see 0:
-1. Verify Supabase is not paused
+### Any listing page shows 0 restaurants
+All DB pages use `force-dynamic` — there is no edge cache to bust. If a page shows empty:
+1. Verify Supabase is not paused — run `SELECT COUNT(*) FROM "Restaurant" WHERE is_published = true;` → should be ~4,974
 2. Check cuisine tags exist: `SELECT COUNT(*) FROM "Restaurant" WHERE cuisine_tags IS NOT NULL;` → should be ~1,063
-3. Trigger a redeploy to bust any remaining Vercel edge cache
+3. If Supabase was just resumed, trigger a redeploy: `git commit --allow-empty -m "chore: redeploy" && git push origin main`
 
 ### Search page shows "Something went wrong" (error.tsx) instead of results
 Cause: `RestaurantListCard` has `onClick` handlers and MUST be a `'use client'` component. If rendered from a server context without this directive, Next.js throws during React rendering (outside any try/catch). This error only appears when search actually returns results — 0 results hides the bug.
@@ -214,6 +238,5 @@ Cause: restaurants in DB have NULL or 0 latitude/longitude. The Haversine query 
 ## What's next
 - Add `ANTHROPIC_API_KEY` and run `classify-cuisine.ts`, `classify-dietary.ts`, `ai-enrich.ts` for accurate AI tagging on all 4,974 restaurants
 - Add more Outscraper city/state Excel files and re-run the full pipeline
-- Apply `ListingClient` filter bar to state listing page (`/usa/[state]/indian-restaurants`)
-- Apply `ListingClient` to cuisine hub pages (`/indian-food/[cuisine]`)
-- Add more Instagram posts: update `POSTS` array in `/instagram` page and `InstagramHomeBanner`
+- Add more Instagram posts: update `POSTS` array in `app/instagram/page.tsx` and `components/instagram/InstagramHomeBanner.tsx`
+- Add a Privacy Policy page (`/privacy`) linked from the cookie banner
