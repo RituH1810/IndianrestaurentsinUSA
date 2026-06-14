@@ -50,7 +50,7 @@ The Next.js app lives at the **repo root**, not in a subdirectory. The `web/` fo
 | Component | Location | Purpose |
 |-----------|----------|---------|
 | `ListingClient` | `components/listing/ListingClient.tsx` | Client-side filter bar + ranked list (TripAdvisor style) |
-| `RestaurantListCard` | `components/restaurant/RestaurantListCard.tsx` | Horizontal ranked card — medal ranks for top 3, Open/Closed pill, cuisine/dietary badges |
+| `RestaurantListCard` | `components/restaurant/RestaurantListCard.tsx` | **`'use client'`** — horizontal ranked card — medal ranks for top 3, Open/Closed pill, cuisine/dietary badges. Must stay a client component (has onClick handlers). |
 | `RestaurantCard` | `components/restaurant/RestaurantCard.tsx` | Grid card with photo overlay (cuisine/state pages) |
 | `MapClient` | `components/map/MapClient.tsx` | Leaflet map, dynamic-imported with `ssr: false` |
 | `Header` | `components/layout/Header.tsx` | **White** sticky header with logo + gray nav links + blue hover |
@@ -142,7 +142,16 @@ Fix: Change `DATABASE_URL` in Vercel to port `5432` (session mode), remove `?pgb
 3. If 0, run `UPDATE "Restaurant" SET is_published = true;` then redeploy
 
 ### Filter pages show 0 restaurants (cuisine/dietary)
-Run `npx tsx scripts/keyword-tag.ts` to tag restaurants with keyword matching (no API key needed), then redeploy.
+Two possible causes:
+1. **Stale Vercel cache** — pages were statically built when Supabase was paused and cached empty results. Fix: trigger a fresh redeploy (`git commit --allow-empty -m "chore: redeploy" && git push`). The cuisine/state/city pages are all ISR (`revalidate = 3600`) so they need a new build to pick up live DB data.
+2. **No cuisine tags in DB** — run `npx tsx scripts/keyword-tag.ts` to apply keyword-based tags. Note: the script prints `cuisine tagged: 0` if tags are already correctly set (it only updates on change — this is normal). Verify tags exist: `SELECT COUNT(*) FROM "Restaurant" WHERE cuisine_tags IS NOT NULL;` should return ~1,063.
+
+### Search page shows "Something went wrong" (error.tsx) instead of results
+Cause: `RestaurantListCard` has `onClick` handlers and MUST be a `'use client'` component. If rendered from a server context without this directive, Next.js throws during React rendering (outside any try/catch). This error only appears when search actually returns results — 0 results hides the bug.
+Fix: ensure `'use client'` is the first line of `components/restaurant/RestaurantListCard.tsx`. Do not remove it.
+
+### Search returns no results (case mismatch)
+The search query uses `mode: 'insensitive'` (PostgreSQL `ILIKE`) on all `contains` filters so "chicago" matches "Chicago", "north indian" matches the `north-indian` tag, etc. Do not revert to plain `contains` — it is case-sensitive and breaks search for most real-world queries.
 
 ### 404 on Vercel deployment URL
 Check Vercel → Settings → General → Framework Preset = **Next.js** (not "Other").
