@@ -36,6 +36,7 @@ The Next.js app lives at the **repo root**, not in a subdirectory. The `web/` fo
 ```
 /                                    Homepage
 /restaurants/[slug]                  Individual restaurant
+/restaurants/near-me                 25-mile radius search by geolocation
 /usa/[state]/indian-restaurants      State listing
 /usa/[state]/[city]/indian-restaurants  City listing (TripAdvisor-style with filter bar)
 /indian-food/[cuisine]               Cuisine filter
@@ -44,18 +45,22 @@ The Next.js app lives at the **repo root**, not in a subdirectory. The `web/` fo
 /guides/[slug]                       Editorial guides
 /map                                 Interactive Leaflet map
 /search                              Search (dynamic)
+/instagram                           Instagram page with embedded reels
 ```
 
 ## Key components
 | Component | Location | Purpose |
 |-----------|----------|---------|
 | `ListingClient` | `components/listing/ListingClient.tsx` | Client-side filter bar + ranked list (TripAdvisor style) |
-| `RestaurantListCard` | `components/restaurant/RestaurantListCard.tsx` | **`'use client'`** — horizontal ranked card — medal ranks for top 3, Open/Closed pill, cuisine/dietary badges. Must stay a client component (has onClick handlers). |
+| `RestaurantListCard` | `components/restaurant/RestaurantListCard.tsx` | **`'use client'`** — horizontal ranked card — medal ranks for top 3, cuisine/dietary badges, optional `distanceMiles` prop. Must stay a client component (has onClick handlers). |
 | `RestaurantCard` | `components/restaurant/RestaurantCard.tsx` | Grid card with photo overlay (cuisine/state pages) |
 | `MapClient` | `components/map/MapClient.tsx` | Leaflet map, dynamic-imported with `ssr: false` |
 | `Header` | `components/layout/Header.tsx` | **White** sticky header with logo + gray nav links + blue hover |
-| `Footer` | `components/layout/Footer.tsx` | Dark gray-900 footer with cuisine/dietary/company links |
+| `Footer` | `components/layout/Footer.tsx` | Dark gray-900 footer with cuisine/dietary/company/Instagram links |
 | `Badge` | `components/ui/Badge.tsx` | Rounded-full pills — cuisine (saffron/30 + maroon text), dietary (emerald-100) |
+| `NearMeButton` | `components/filters/NearMeButton.tsx` | **`'use client'`** — pill button, requests geolocation → redirects to `/restaurants/near-me`. Two variants: `hero` (white border) and `default` (gray border). |
+| `InstagramFeed` | `components/instagram/InstagramFeed.tsx` | **`'use client'`** — renders Instagram blockquote embeds + loads embed.js via `next/script lazyOnload`. |
+| `InstagramHomeBanner` | `components/instagram/InstagramHomeBanner.tsx` | Homepage Instagram section with profile header + 3 embedded reels. |
 
 ## Error handling
 - `app/error.tsx` — global error boundary; shows friendly "try again" page instead of Next.js crash screen
@@ -110,6 +115,40 @@ Run `keyword-tag.ts` first (no API key) for instant tagging, then AI scripts lat
 - Cities: nationwide coverage from Outscraper export
 - AI enrichment (better cuisine/dietary tags + descriptions) pending — add ANTHROPIC_API_KEY and run scripts 4–6
 
+## ISR strategy — no generateStaticParams on DB pages
+**All dynamic pages that query the DB use lazy ISR (no `generateStaticParams`).**
+
+Pages affected: `restaurants/[slug]`, `usa/[state]/indian-restaurants`, `usa/[state]/[city]/indian-restaurants`, `indian-food/[cuisine]`, `indian-restaurants/[diet]`.
+
+Why: `generateStaticParams` pre-builds all pages at deploy time. If Supabase is paused when Vercel builds, every page caches empty results. Without it, pages render on the **first request** (ISR via `revalidate = 3600`) so they always read live DB data. Deploys are also faster.
+
+Do NOT add `generateStaticParams` back to these pages.
+
+## "Use my location" / Near Me search
+- `NearMeButton` (`components/filters/NearMeButton.tsx`) — browser Geolocation API → redirects to `/restaurants/near-me?lat=X&lng=Y`
+- `/restaurants/near-me` page runs a **Haversine SQL query** via `prisma.$queryRaw` to find restaurants within **25 miles**, sorted by distance
+- Reverse-geocode for display heading done server-side via Nominatim (OpenStreetMap, free, no API key)
+- `RestaurantListCard` accepts optional `distanceMiles` prop — shows "X mi away" in blue next to city/state
+- Requires `latitude`/`longitude` fields populated in DB (Outscraper exports include these)
+
+## Instagram integration
+- `/instagram` page — gradient hero, 3 embedded reels, follow CTA
+- `InstagramFeed` — client component; uses `<blockquote data-instgrm-permalink>` + `embed.js` via `next/script strategy="lazyOnload"`. Calls `window.instgrm.Embeds.process()` on load and on mount (handles client-side navigation).
+- `InstagramHomeBanner` — homepage section (between Top Cities and Why Us) with profile header + `InstagramFeed` + "See all posts" link
+- Mobile floating button — fixed bottom-right Instagram icon in `app/layout.tsx`, `lg:hidden` (only on mobile/tablet), links to Instagram profile
+- Footer — Instagram link in Company column + Instagram icon in bottom bar
+- To add more posts: update `POSTS` array in `app/instagram/page.tsx` and `components/instagram/InstagramHomeBanner.tsx`
+- Instagram handle: `@indianrestaurentsinusa` (note: "restaurents" not "restaurants" — intentional, matches the registered handle)
+
+## business_status field
+`OPERATIONAL` means the business is not permanently/temporarily closed — it does NOT mean open right now (no real-time hours data from Outscraper). Never display "Open" for `OPERATIONAL` status.
+
+Only show status pills for:
+- `CLOSED_PERMANENTLY` → red "Permanently Closed"
+- `CLOSED_TEMPORARILY` → amber "Temporarily Closed"
+
+This applies to both `RestaurantListCard` and the restaurant detail page sidebar.
+
 ## Deployment
 **Never deploy from the terminal.** Push to `main` → Vercel auto-deploys.
 
@@ -141,10 +180,11 @@ Fix: Change `DATABASE_URL` in Vercel to port `5432` (session mode), remove `?pgb
 2. Check `SELECT COUNT(*) FROM "Restaurant" WHERE is_published = true;`
 3. If 0, run `UPDATE "Restaurant" SET is_published = true;` then redeploy
 
-### Filter pages show 0 restaurants (cuisine/dietary)
-Two possible causes:
-1. **Stale Vercel cache** — pages were statically built when Supabase was paused and cached empty results. Fix: trigger a fresh redeploy (`git commit --allow-empty -m "chore: redeploy" && git push`). The cuisine/state/city pages are all ISR (`revalidate = 3600`) so they need a new build to pick up live DB data.
-2. **No cuisine tags in DB** — run `npx tsx scripts/keyword-tag.ts` to apply keyword-based tags. Note: the script prints `cuisine tagged: 0` if tags are already correctly set (it only updates on change — this is normal). Verify tags exist: `SELECT COUNT(*) FROM "Restaurant" WHERE cuisine_tags IS NOT NULL;` should return ~1,063.
+### Filter/city/cuisine pages show 0 restaurants
+Since `generateStaticParams` was removed, pages now render on first request — they should always show live data as long as Supabase is awake. If you still see 0:
+1. Verify Supabase is not paused
+2. Check cuisine tags exist: `SELECT COUNT(*) FROM "Restaurant" WHERE cuisine_tags IS NOT NULL;` → should be ~1,063
+3. Trigger a redeploy to bust any remaining Vercel edge cache
 
 ### Search page shows "Something went wrong" (error.tsx) instead of results
 Cause: `RestaurantListCard` has `onClick` handlers and MUST be a `'use client'` component. If rendered from a server context without this directive, Next.js throws during React rendering (outside any try/catch). This error only appears when search actually returns results — 0 results hides the bug.
@@ -152,6 +192,9 @@ Fix: ensure `'use client'` is the first line of `components/restaurant/Restauran
 
 ### Search returns no results (case mismatch)
 The search query uses `mode: 'insensitive'` (PostgreSQL `ILIKE`) on all `contains` filters so "chicago" matches "Chicago", "north indian" matches the `north-indian` tag, etc. Do not revert to plain `contains` — it is case-sensitive and breaks search for most real-world queries.
+
+### City page shows 0 results (slug mismatch)
+The city page tries an exact match first, then falls back to case-insensitive `contains`. If a hardcoded link uses the wrong slug (e.g. `new-york-city` when DB has `New York`), the fallback query handles it. If adding new featured city links to the homepage, verify the actual city name in the DB first.
 
 ### 404 on Vercel deployment URL
 Check Vercel → Settings → General → Framework Preset = **Next.js** (not "Other").
@@ -165,8 +208,12 @@ Map uses Leaflet/OpenStreetMap — no API key required. If it shows blank, check
 ### Mobile search bar overflow
 Hero search: placeholder is intentionally short ("City, cuisine, or name…"), button uses `px-5 md:px-8`, and decorative blur orbs are `hidden md:block`. Do not revert these — they prevent horizontal overflow on narrow screens.
 
+### "Near me" returns 0 results
+Cause: restaurants in DB have NULL or 0 latitude/longitude. The Haversine query skips rows where `latitude IS NULL OR longitude IS NULL OR latitude = 0 OR longitude = 0`. Verify with: `SELECT COUNT(*) FROM "Restaurant" WHERE latitude IS NOT NULL AND latitude != 0;`
+
 ## What's next
 - Add `ANTHROPIC_API_KEY` and run `classify-cuisine.ts`, `classify-dietary.ts`, `ai-enrich.ts` for accurate AI tagging on all 4,974 restaurants
 - Add more Outscraper city/state Excel files and re-run the full pipeline
 - Apply `ListingClient` filter bar to state listing page (`/usa/[state]/indian-restaurants`)
 - Apply `ListingClient` to cuisine hub pages (`/indian-food/[cuisine]`)
+- Add more Instagram posts: update `POSTS` array in `/instagram` page and `InstagramHomeBanner`
