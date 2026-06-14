@@ -101,7 +101,7 @@ export default function HomePage() {
               id="hero-search"
               name="q"
               type="search"
-              placeholder="City, cuisine, or name…"
+              placeholder="City, zip code, cuisine, or name…"
               className="flex-1 px-4 md:px-6 py-3.5 md:py-4 text-gray-900 text-sm focus:outline-none bg-white min-w-0"
             />
             <button

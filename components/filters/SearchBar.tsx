@@ -9,7 +9,7 @@ interface Props {
 
 export function SearchBar({
   defaultValue = '',
-  placeholder = 'Search Indian restaurants by name, cuisine, or city…',
+  placeholder = 'Search by name, city, zip code, or cuisine…',
   action = '/search',
   className = '',
 }: Props) {

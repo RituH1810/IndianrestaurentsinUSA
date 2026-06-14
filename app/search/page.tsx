@@ -56,6 +56,7 @@ export default async function SearchPage({
         { name: { contains: q, mode: 'insensitive' as const } },
         { city: { contains: q, mode: 'insensitive' as const } },
         { state: { contains: q, mode: 'insensitive' as const } },
+        { zip: { contains: q, mode: 'insensitive' as const } },
         { cuisine_tags: { contains: q, mode: 'insensitive' as const } },
         { description: { contains: q, mode: 'insensitive' as const } },
       ],
@@ -98,7 +99,7 @@ export default async function SearchPage({
 
       {!q && (
         <p className="text-gray-400 text-sm">
-          Search by restaurant name, city, state, or cuisine type.
+          Search by restaurant name, city, zip code, state, or cuisine type.
         </p>
       )}
 
