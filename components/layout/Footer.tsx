@@ -82,7 +82,7 @@ export default function Footer() {
         </div>
 
         <div className="border-t border-gray-700 mt-8 pt-6 flex flex-col sm:flex-row justify-between items-center gap-4 text-xs text-gray-500">
-          <p>© 2025 Indian Restaurants in USA. All rights reserved.</p>
+          <p>© 2026 Indian Restaurants in USA. All rights reserved.</p>
           <div className="flex items-center gap-4">
             <a
               href="https://www.instagram.com/indianrestaurentsinusa/"
