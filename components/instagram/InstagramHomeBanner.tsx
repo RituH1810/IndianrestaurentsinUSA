@@ -1,9 +1,10 @@
 import Link from 'next/link';
+import { InstagramFeed } from '@/components/instagram/InstagramFeed';
 
 const POSTS = [
-  { url: 'https://www.instagram.com/p/DZixxTeu6dj/', label: 'Post 1' },
-  { url: 'https://www.instagram.com/p/DZipIZcuytU/', label: 'Post 2' },
-  { url: 'https://www.instagram.com/p/DZihn4fOzBJ/', label: 'Post 3' },
+  'https://www.instagram.com/p/DZixxTeu6dj/',
+  'https://www.instagram.com/p/DZipIZcuytU/',
+  'https://www.instagram.com/p/DZihn4fOzBJ/',
 ];
 
 const InstagramIcon = ({ className }: { className?: string }) => (
@@ -38,46 +39,11 @@ export function InstagramHomeBanner() {
           </a>
         </div>
 
-        {/* Post cards — horizontal scroll on mobile, grid on md+ */}
-        <div className="flex gap-4 overflow-x-auto pb-2 md:grid md:grid-cols-3 md:overflow-visible snap-x snap-mandatory scrollbar-hide">
-          {POSTS.map((post, i) => (
-            <a
-              key={post.url}
-              href={post.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="group flex-shrink-0 w-64 md:w-auto snap-start"
-              aria-label={`View Instagram post ${i + 1}`}
-            >
-              <div className="relative h-64 rounded-2xl overflow-hidden bg-gradient-to-br from-purple-500 via-pink-500 to-orange-400 shadow-lg group-hover:shadow-xl transition-all group-hover:scale-[1.02]">
-                {/* Decorative pattern */}
-                <div className="absolute inset-0 opacity-20">
-                  <div className="absolute top-4 left-4 w-16 h-16 rounded-full border-4 border-white/60" />
-                  <div className="absolute bottom-8 right-6 w-24 h-24 rounded-full border-4 border-white/40" />
-                  <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-32 h-32 rounded-full border-4 border-white/30" />
-                </div>
-
-                {/* Center icon */}
-                <div className="absolute inset-0 flex flex-col items-center justify-center gap-2">
-                  <div className="w-14 h-14 rounded-2xl bg-white/25 backdrop-blur-sm flex items-center justify-center">
-                    <InstagramIcon className="w-7 h-7 text-white" />
-                  </div>
-                  <span className="text-white/90 text-xs font-semibold mt-1">View on Instagram</span>
-                </div>
-
-                {/* Hover overlay */}
-                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors flex items-end p-4">
-                  <span className="text-white font-semibold text-sm opacity-0 group-hover:opacity-100 transition-opacity translate-y-2 group-hover:translate-y-0 transition-transform">
-                    Open post →
-                  </span>
-                </div>
-              </div>
-            </a>
-          ))}
-        </div>
+        {/* Actual embedded reels */}
+        <InstagramFeed posts={POSTS} />
 
         {/* Footer CTA */}
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mt-8">
+        <div className="text-center mt-8">
           <Link
             href="/instagram"
             className="text-sm text-pink-600 font-semibold hover:underline"
