@@ -46,7 +46,9 @@ function RankBadge({ rank }: { rank: number }) {
 export function RestaurantListCard({ restaurant, rank }: Props) {
   const cuisineTags = parseTags(restaurant.cuisine_tags);
   const dietaryTags = parseTags(restaurant.dietary_tags);
-  const isOpen = restaurant.business_status === 'OPERATIONAL';
+  const businessStatus = restaurant.business_status;
+  const isTemporarilyClosed = businessStatus === 'CLOSED_TEMPORARILY';
+  const isPermanentlyClosed = businessStatus === 'CLOSED_PERMANENTLY';
 
   return (
     <div className="py-5 flex gap-4 items-start group hover:bg-blue-50/50 -mx-4 px-4 rounded-xl transition-colors">
@@ -123,13 +125,14 @@ export function RestaurantListCard({ restaurant, rank }: Props) {
 
         {/* Status + contact */}
         <div className="flex flex-wrap items-center gap-3 mt-2">
-          {restaurant.business_status && (
-            <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${
-              isOpen
-                ? 'bg-emerald-100 text-emerald-700'
-                : 'bg-red-100 text-red-600'
-            }`}>
-              ● {isOpen ? 'Open' : 'Closed'}
+          {isPermanentlyClosed && (
+            <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-red-100 text-red-600">
+              ● Permanently Closed
+            </span>
+          )}
+          {isTemporarilyClosed && (
+            <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-amber-100 text-amber-700">
+              ● Temporarily Closed
             </span>
           )}
           {restaurant.phone && (
