@@ -16,19 +16,6 @@ export async function generateMetadata({ params }: { params: { state: string; ci
   return cityMeta(cityName, stateName, 0);
 }
 
-export async function generateStaticParams() {
-  try {
-    const rows = await prisma.restaurant.findMany({
-      where: { is_published: true },
-      select: { state: true, city: true },
-      distinct: ['state', 'city'],
-    });
-    return rows.map(r => ({
-      state: r.state.toLowerCase().replace(/\s+/g, '-'),
-      city: r.city.toLowerCase().replace(/\s+/g, '-'),
-    }));
-  } catch { return []; }
-}
 
 export default async function CityHubPage({ params }: { params: { state: string; city: string } }) {
   const stateName = slugToLabel(params.state);

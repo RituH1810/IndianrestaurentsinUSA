@@ -15,15 +15,6 @@ export async function generateMetadata({ params }: { params: { state: string } }
   return stateMeta(stateName, 0);
 }
 
-export async function generateStaticParams() {
-  try {
-    const rows = await prisma.restaurant.groupBy({
-      by: ['state'],
-      where: { is_published: true },
-    });
-    return rows.map(r => ({ state: r.state.toLowerCase().replace(/\s+/g, '-') }));
-  } catch { return []; }
-}
 
 export default async function StateHubPage({ params }: { params: { state: string } }) {
   const stateName = slugToLabel(params.state);

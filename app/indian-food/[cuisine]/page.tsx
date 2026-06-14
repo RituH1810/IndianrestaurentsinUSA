@@ -15,9 +15,6 @@ export async function generateMetadata({ params }: { params: { cuisine: string }
   return cuisineMeta(label, 0);
 }
 
-export async function generateStaticParams() {
-  return CUISINES.map(c => ({ cuisine: c.tag }));
-}
 
 function whereHasTag(field: 'cuisine_tags', tag: string) {
   return {

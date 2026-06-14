@@ -22,12 +22,6 @@ export async function generateMetadata({ params }: { params: { slug: string } })
   } catch { return {}; }
 }
 
-export async function generateStaticParams() {
-  try {
-    const rows = await prisma.restaurant.findMany({ where: { is_published: true }, select: { slug: true } });
-    return rows.map(r => ({ slug: r.slug }));
-  } catch { return []; }
-}
 
 export default async function RestaurantPage({ params }: { params: { slug: string } }) {
   let restaurant;

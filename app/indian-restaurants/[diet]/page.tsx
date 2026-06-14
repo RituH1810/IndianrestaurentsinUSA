@@ -15,9 +15,6 @@ export async function generateMetadata({ params }: { params: { diet: string } })
   return dietaryMeta(label, 0);
 }
 
-export async function generateStaticParams() {
-  return DIETARY.map(d => ({ diet: d.tag }));
-}
 
 function whereHasTag(field: 'dietary_tags', tag: string) {
   return {
