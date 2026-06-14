@@ -1,4 +1,4 @@
-export const revalidate = 3600; // re-fetch from DB every hour
+export const dynamic = 'force-dynamic';
 
 import Link from 'next/link';
 import { prisma } from '@/lib/prisma';
