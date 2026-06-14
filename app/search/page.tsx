@@ -20,11 +20,11 @@ export default async function SearchPage({ searchParams }: { searchParams: { q?:
         where: {
           is_published: true,
           OR: [
-            { name: { contains: q } },
-            { city: { contains: q } },
-            { state: { contains: q } },
-            { cuisine_tags: { contains: q } },
-            { description: { contains: q } },
+            { name: { contains: q, mode: 'insensitive' } },
+            { city: { contains: q, mode: 'insensitive' } },
+            { state: { contains: q, mode: 'insensitive' } },
+            { cuisine_tags: { contains: q, mode: 'insensitive' } },
+            { description: { contains: q, mode: 'insensitive' } },
           ],
         },
         orderBy: { publish_priority: 'desc' },
