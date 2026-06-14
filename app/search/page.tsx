@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 import { prisma } from '@/lib/prisma';
 import { RestaurantGrid } from '@/components/restaurant/RestaurantGrid';
 import { SearchBar } from '@/components/filters/SearchBar';
@@ -12,18 +14,22 @@ export const metadata: Metadata = {
   robots: { index: false, follow: true },
 };
 
-function paginationRange(current: number, total: number): (number | '…')[] {
-  if (total <= 7) return Array.from({ length: total }, (_, i) => i + 1);
-  const delta = 2;
-  const inner: number[] = [];
-  for (let i = Math.max(2, current - delta); i <= Math.min(total - 1, current + delta); i++) {
-    inner.push(i);
+// Returns page numbers and 'gap' markers for ellipsis
+function buildPageRange(current: number, total: number): (number | 'gap')[] {
+  if (total <= 1) return [];
+  if (total <= 9) return Array.from({ length: total }, (_, i) => i + 1);
+
+  const visible = new Set<number>([1, total]);
+  for (let p = Math.max(1, current - 2); p <= Math.min(total, current + 2); p++) {
+    visible.add(p);
   }
-  const result: (number | '…')[] = [1];
-  if (inner[0] > 2) result.push('…');
-  result.push(...inner);
-  if (inner[inner.length - 1] < total - 1) result.push('…');
-  result.push(total);
+
+  const sorted = [...visible].sort((a, b) => a - b);
+  const result: (number | 'gap')[] = [];
+  for (let i = 0; i < sorted.length; i++) {
+    if (i > 0 && sorted[i] - sorted[i - 1] > 1) result.push('gap');
+    result.push(sorted[i]);
+  }
   return result;
 }
 
@@ -34,7 +40,6 @@ export default async function SearchPage({
 }) {
   const q = (searchParams.q ?? '').trim();
   const page = Math.max(1, parseInt(searchParams.page ?? '1', 10));
-  const skip = (page - 1) * PAGE_SIZE;
 
   let restaurants: {
     slug: string; name: string; city: string; state: string;
@@ -57,12 +62,12 @@ export default async function SearchPage({
     };
 
     try {
-      [total, restaurants] = await Promise.all([
+      const [count, rows] = await Promise.all([
         prisma.restaurant.count({ where }),
         prisma.restaurant.findMany({
           where,
           orderBy: { publish_priority: 'desc' },
-          skip,
+          skip: (page - 1) * PAGE_SIZE,
           take: PAGE_SIZE,
           select: {
             slug: true, name: true, city: true, state: true,
@@ -72,11 +77,13 @@ export default async function SearchPage({
           },
         }),
       ]);
+      total = count;
+      restaurants = rows;
     } catch { /* DB not ready */ }
   }
 
-  const totalPages = Math.ceil(total / PAGE_SIZE);
-  const pageRange = paginationRange(page, totalPages);
+  const totalPages = total > 0 ? Math.ceil(total / PAGE_SIZE) : 0;
+  const pageRange = buildPageRange(page, totalPages);
 
   return (
     <div className="container mx-auto px-4 py-10 max-w-5xl">
@@ -103,13 +110,17 @@ export default async function SearchPage({
         </p>
       )}
 
-      {q && restaurants.length > 0 && (
+      {restaurants.length > 0 && (
         <>
           <RestaurantGrid restaurants={restaurants} />
 
-          {/* Pagination */}
+          {/* Pagination — only when there is more than one page */}
           {totalPages > 1 && (
-            <nav className="flex justify-center items-center gap-1.5 mt-12" aria-label="Pagination">
+            <nav
+              className="flex justify-center items-center gap-1.5 mt-12 flex-wrap"
+              aria-label="Search results pages"
+            >
+              {/* Prev */}
               {page > 1 && (
                 <Link
                   href={`/search?q=${encodeURIComponent(q)}&page=${page - 1}`}
@@ -119,18 +130,20 @@ export default async function SearchPage({
                 </Link>
               )}
 
+              {/* Page number buttons + gap markers */}
               {pageRange.map((p, idx) =>
-                p === '…' ? (
-                  <span key={`ellipsis-${idx}`} className="w-9 text-center text-gray-400 text-sm">
+                p === 'gap' ? (
+                  <span key={`gap-${idx}`} className="w-8 text-center text-gray-400 text-sm select-none">
                     …
                   </span>
                 ) : (
                   <Link
                     key={p}
                     href={`/search?q=${encodeURIComponent(q)}&page=${p}`}
+                    aria-current={p === page ? 'page' : undefined}
                     className={`w-9 h-9 flex items-center justify-center rounded-full text-sm font-medium transition-colors ${
                       p === page
-                        ? 'bg-spice text-white'
+                        ? 'bg-spice text-white pointer-events-none'
                         : 'border border-gray-200 text-gray-600 hover:border-spice hover:text-spice'
                     }`}
                   >
@@ -139,6 +152,7 @@ export default async function SearchPage({
                 ),
               )}
 
+              {/* Next */}
               {page < totalPages && (
                 <Link
                   href={`/search?q=${encodeURIComponent(q)}&page=${page + 1}`}
