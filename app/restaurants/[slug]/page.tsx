@@ -173,12 +173,18 @@ export default async function RestaurantPage({ params }: { params: { slug: strin
                   </a>
                 </div>
               )}
-              <div className="text-sm">
-                <span className="text-gray-500">Status: </span>
-                <span className={restaurant.business_status === 'OPERATIONAL' ? 'text-green-600 font-semibold' : 'text-red-500'}>
-                  {restaurant.business_status === 'OPERATIONAL' ? 'Open' : restaurant.business_status}
-                </span>
-              </div>
+              {restaurant.business_status === 'CLOSED_PERMANENTLY' && (
+                <div className="text-sm">
+                  <span className="text-gray-500">Status: </span>
+                  <span className="text-red-500 font-semibold">Permanently Closed</span>
+                </div>
+              )}
+              {restaurant.business_status === 'CLOSED_TEMPORARILY' && (
+                <div className="text-sm">
+                  <span className="text-gray-500">Status: </span>
+                  <span className="text-amber-600 font-semibold">Temporarily Closed</span>
+                </div>
+              )}
               {restaurant.metro && (
                 <div className="text-sm text-gray-500">Metro: {restaurant.metro}</div>
               )}
