@@ -21,6 +21,9 @@ export type FilterableRestaurant = {
   longitude?: number | null;
 };
 
+const PAGE_SIZE = 30; // 10 rows × 3 columns
+const RATINGS = [4.0, 4.5] as const;
+
 function haversine(lat1: number, lng1: number, lat2: number, lng2: number): number {
   const R = 3959;
   const dLat = (lat2 - lat1) * Math.PI / 180;
@@ -32,7 +35,21 @@ function haversine(lat1: number, lng1: number, lat2: number, lng2: number): numb
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 }
 
-const RATINGS = [4.0, 4.5] as const;
+function buildPageRange(current: number, total: number): (number | 'gap')[] {
+  if (total <= 1) return [];
+  if (total <= 9) return Array.from({ length: total }, (_, i) => i + 1);
+  const visible = new Set<number>([1, total]);
+  for (let p = Math.max(1, current - 2); p <= Math.min(total, current + 2); p++) {
+    visible.add(p);
+  }
+  const sorted = Array.from(visible).sort((a, b) => a - b);
+  const result: (number | 'gap')[] = [];
+  for (let i = 0; i < sorted.length; i++) {
+    if (i > 0 && sorted[i] - sorted[i - 1] > 1) result.push('gap');
+    result.push(sorted[i]);
+  }
+  return result;
+}
 
 interface Props {
   restaurants: FilterableRestaurant[];
@@ -45,11 +62,16 @@ export function FilterableGrid({ restaurants, emptyMessage = 'No restaurants fou
   const [cuisineFilter, setCuisineFilter] = useState<string | null>(null);
   const [dietaryFilter, setDietaryFilter] = useState<string | null>(null);
   const [minRating, setMinRating] = useState<number | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
 
-  // Re-sort by distance whenever the restaurant list changes (includes initial mount)
+  // When restaurants prop changes (navigation), reset all state and re-run location sort
   useEffect(() => {
     setBaseList(restaurants);
     setLocationActive(false);
+    setCuisineFilter(null);
+    setDietaryFilter(null);
+    setMinRating(null);
+    setCurrentPage(1);
 
     if (!navigator.geolocation) return;
     navigator.geolocation.getCurrentPosition(
@@ -67,6 +89,11 @@ export function FilterableGrid({ restaurants, emptyMessage = 'No restaurants fou
       { timeout: 4000, maximumAge: 300_000 },
     );
   }, [restaurants]);
+
+  // Reset to page 1 whenever filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [cuisineFilter, dietaryFilter, minRating]);
 
   const availableCuisines = useMemo(() => {
     const tags = new Set<string>();
@@ -88,12 +115,20 @@ export function FilterableGrid({ restaurants, emptyMessage = 'No restaurants fou
     return list;
   }, [baseList, cuisineFilter, dietaryFilter, minRating]);
 
+  const totalPages = Math.ceil(filtered.length / PAGE_SIZE) || 0;
+  const paginated = filtered.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
+  const pageRange = buildPageRange(currentPage, totalPages);
   const hasActive = cuisineFilter !== null || dietaryFilter !== null || minRating !== null;
 
   const clearAll = () => {
     setCuisineFilter(null);
     setDietaryFilter(null);
     setMinRating(null);
+  };
+
+  const goToPage = (p: number) => {
+    setCurrentPage(p);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const showFilterBar = availableCuisines.length > 0 || availableDietary.length > 0;
@@ -104,7 +139,6 @@ export function FilterableGrid({ restaurants, emptyMessage = 'No restaurants fou
       {showFilterBar && (
         <div className="sticky top-14 z-30 bg-white/95 backdrop-blur-sm border-b border-gray-100 -mx-4 px-4 py-3 mb-4 shadow-sm">
           <div className="flex flex-wrap gap-2 items-center">
-            {/* Rating */}
             {RATINGS.map(r => (
               <button
                 key={r}
@@ -123,7 +157,6 @@ export function FilterableGrid({ restaurants, emptyMessage = 'No restaurants fou
               <div className="w-px h-5 bg-gray-200 mx-0.5" />
             )}
 
-            {/* Cuisine pills */}
             {availableCuisines.map(c => (
               <button
                 key={c.tag}
@@ -138,7 +171,6 @@ export function FilterableGrid({ restaurants, emptyMessage = 'No restaurants fou
               </button>
             ))}
 
-            {/* Dietary pills */}
             {availableDietary.map(d => (
               <button
                 key={d.tag}
@@ -153,7 +185,6 @@ export function FilterableGrid({ restaurants, emptyMessage = 'No restaurants fou
               </button>
             ))}
 
-            {/* Clear all */}
             {hasActive && (
               <button
                 onClick={clearAll}
@@ -166,12 +197,13 @@ export function FilterableGrid({ restaurants, emptyMessage = 'No restaurants fou
         </div>
       )}
 
-      {/* Count + location indicator */}
+      {/* Count + page info + location indicator */}
       <div className="flex flex-wrap items-center gap-3 mb-5 text-sm">
         <span className={hasActive ? 'font-semibold text-spice' : 'text-gray-500'}>
           {hasActive
             ? `${filtered.length} of ${restaurants.length} restaurants`
             : `${restaurants.length} restaurants`}
+          {totalPages > 1 && ` · Page ${currentPage} of ${totalPages}`}
         </span>
         {locationActive && (
           <span className="flex items-center gap-1 text-spice">
@@ -183,20 +215,71 @@ export function FilterableGrid({ restaurants, emptyMessage = 'No restaurants fou
         )}
       </div>
 
-      {/* Grid or empty state */}
-      {filtered.length === 0 ? (
+      {/* Grid */}
+      {paginated.length === 0 ? (
         <div className="text-center py-20">
           <div className="text-4xl mb-4">🍽️</div>
-          <p className="text-gray-500 mb-4">No restaurants match your filters.</p>
-          <button
-            onClick={clearAll}
-            className="text-sm bg-spice text-white px-5 py-2 rounded-full font-semibold hover:bg-maroon transition-colors"
-          >
-            Clear all filters
-          </button>
+          <p className="text-gray-500 mb-4">
+            {hasActive ? 'No restaurants match your filters.' : emptyMessage}
+          </p>
+          {hasActive && (
+            <button
+              onClick={clearAll}
+              className="text-sm bg-spice text-white px-5 py-2 rounded-full font-semibold hover:bg-maroon transition-colors"
+            >
+              Clear all filters
+            </button>
+          )}
         </div>
       ) : (
-        <RestaurantGrid restaurants={filtered} emptyMessage={emptyMessage} />
+        <RestaurantGrid restaurants={paginated} emptyMessage={emptyMessage} />
+      )}
+
+      {/* Pagination controls */}
+      {totalPages > 1 && (
+        <nav
+          className="flex justify-center items-center gap-1.5 mt-10 flex-wrap"
+          aria-label="Page navigation"
+        >
+          {currentPage > 1 && (
+            <button
+              onClick={() => goToPage(currentPage - 1)}
+              className="px-4 py-2 rounded-full border border-gray-200 text-sm text-gray-600 hover:border-spice hover:text-spice transition-colors"
+            >
+              ← Prev
+            </button>
+          )}
+
+          {pageRange.map((p, idx) =>
+            p === 'gap' ? (
+              <span key={`gap-${idx}`} className="w-8 text-center text-gray-400 text-sm select-none">
+                …
+              </span>
+            ) : (
+              <button
+                key={p}
+                onClick={() => goToPage(Number(p))}
+                aria-current={p === currentPage ? 'page' : undefined}
+                className={`w-9 h-9 flex items-center justify-center rounded-full text-sm font-medium transition-colors ${
+                  p === currentPage
+                    ? 'bg-spice text-white pointer-events-none'
+                    : 'border border-gray-200 text-gray-600 hover:border-spice hover:text-spice'
+                }`}
+              >
+                {p}
+              </button>
+            ),
+          )}
+
+          {currentPage < totalPages && (
+            <button
+              onClick={() => goToPage(currentPage + 1)}
+              className="px-4 py-2 rounded-full border border-gray-200 text-sm text-gray-600 hover:border-spice hover:text-spice transition-colors"
+            >
+              Next →
+            </button>
+          )}
+        </nav>
       )}
     </div>
   );

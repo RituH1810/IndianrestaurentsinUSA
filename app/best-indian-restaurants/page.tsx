@@ -2,7 +2,7 @@ export const dynamic = 'force-dynamic';
 
 import Link from 'next/link';
 import { prisma } from '@/lib/prisma';
-import { RestaurantGrid } from '@/components/restaurant/RestaurantGrid';
+import { FilterableGrid } from '@/components/restaurant/FilterableGrid';
 import { ItemListJsonLd } from '@/components/seo/JsonLd';
 import type { Metadata } from 'next';
 
@@ -19,6 +19,7 @@ export default async function BestRestaurantsPage() {
     rating: number | null; reviews: number | null; photo: string | null;
     cuisine_tags: string | null; dietary_tags: string | null;
     is_hidden_gem: boolean; description: string | null;
+    latitude: number | null; longitude: number | null;
   }[] = [];
 
   try {
@@ -30,6 +31,7 @@ export default async function BestRestaurantsPage() {
         rating: true, reviews: true, photo: true,
         cuisine_tags: true, dietary_tags: true,
         is_hidden_gem: true, description: true,
+        latitude: true, longitude: true,
       },
     });
   } catch { /* DB not ready */ }
@@ -67,7 +69,7 @@ export default async function BestRestaurantsPage() {
           </p>
         </div>
 
-        <RestaurantGrid
+        <FilterableGrid
           restaurants={restaurants}
           emptyMessage="Run the data pipeline (scripts 7 and 10) to discover hidden gems."
         />

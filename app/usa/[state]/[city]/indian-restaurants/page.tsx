@@ -3,10 +3,9 @@ export const dynamic = 'force-dynamic';
 import Link from 'next/link';
 import { prisma } from '@/lib/prisma';
 import { slugToLabel } from '@/lib/utils';
-import { ListingClient } from '@/components/listing/ListingClient';
+import { FilterableGrid } from '@/components/restaurant/FilterableGrid';
 import { BreadcrumbJsonLd, ItemListJsonLd, FaqJsonLd } from '@/components/seo/JsonLd';
 import { cityMeta } from '@/lib/seo';
-import type { RestaurantListData } from '@/lib/types';
 
 const BASE = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.indianrestaurantsinusa.com';
 
@@ -16,17 +15,19 @@ export async function generateMetadata({ params }: { params: { state: string; ci
   return cityMeta(cityName, stateName, 0);
 }
 
-
 export default async function CityHubPage({ params }: { params: { state: string; city: string } }) {
   const stateName = slugToLabel(params.state);
   const cityName = slugToLabel(params.city);
 
-  let restaurants: RestaurantListData[] = [];
-  let total = 0;
+  let restaurants: {
+    slug: string; name: string; city: string; state: string;
+    rating: number | null; reviews: number | null; photo: string | null;
+    cuisine_tags: string | null; dietary_tags: string | null;
+    is_hidden_gem: boolean; description: string | null;
+    latitude: number | null; longitude: number | null;
+  }[] = [];
 
   try {
-    // Try exact match first; fall back to case-insensitive contains for slugs
-    // that don't perfectly round-trip (e.g. "new-york-city" → "New York City" vs "New York")
     const exactWhere = { state: stateName, city: cityName, is_published: true };
     const exactCount = await prisma.restaurant.count({ where: exactWhere });
     const where = exactCount > 0
@@ -37,38 +38,20 @@ export default async function CityHubPage({ params }: { params: { state: string;
           is_published: true,
         };
 
-    const rows = await prisma.restaurant.findMany({
+    restaurants = await prisma.restaurant.findMany({
       where,
       orderBy: { publish_priority: 'desc' },
-      take: 200,
       select: {
         slug: true, name: true, city: true, state: true,
         rating: true, reviews: true, photo: true,
         cuisine_tags: true, dietary_tags: true,
         is_hidden_gem: true, description: true,
-        phone: true, website: true, business_status: true,
+        latitude: true, longitude: true,
       },
     });
-
-    total = await prisma.restaurant.count({ where });
-
-    restaurants = rows.map(r => ({
-      slug: r.slug,
-      name: r.name,
-      city: r.city,
-      state: r.state,
-      rating: r.rating,
-      reviews: r.reviews,
-      photo: r.photo,
-      cuisine_tags: r.cuisine_tags,
-      dietary_tags: r.dietary_tags,
-      is_hidden_gem: r.is_hidden_gem,
-      description: r.description,
-      phone: r.phone,
-      website: r.website,
-      business_status: r.business_status,
-    }));
   } catch { /* DB not ready */ }
+
+  const total = restaurants.length;
 
   const faqs = [
     {
@@ -94,8 +77,7 @@ export default async function CityHubPage({ params }: { params: { state: string;
       />
       <FaqJsonLd faqs={faqs} />
 
-      <div className="container mx-auto px-4 py-8 max-w-4xl">
-        {/* Breadcrumb */}
+      <div className="container mx-auto px-4 py-8 max-w-5xl">
         <nav className="text-sm text-gray-400 mb-5 flex gap-1.5 flex-wrap items-center">
           <Link href="/" className="hover:text-spice transition-colors">Home</Link>
           <span>/</span>
@@ -106,22 +88,21 @@ export default async function CityHubPage({ params }: { params: { state: string;
           <span className="text-gray-700 font-medium">{cityName}</span>
         </nav>
 
-        {/* Header */}
-        <div className="mb-2">
+        <div className="mb-6">
           <h1 className="text-3xl font-bold text-maroon">
             Indian Restaurants in {cityName}, {stateName}
           </h1>
           <p className="text-gray-500 text-sm mt-1">
             {total > 0 ? `${total} restaurants` : 'No listings yet'}
-            {total > 200 ? ' · Showing top 200' : ''}
             {' · '}Use filters below to narrow by cuisine or dietary preference
           </p>
         </div>
 
-        {/* Interactive listing */}
-        <ListingClient restaurants={restaurants} total={total} />
+        <FilterableGrid
+          restaurants={restaurants}
+          emptyMessage={`No Indian restaurants found in ${cityName} yet.`}
+        />
 
-        {/* FAQ */}
         {faqs.length > 0 && (
           <div className="mt-16 max-w-2xl border-t border-gray-100 pt-10">
             <h2 className="text-xl font-bold text-maroon mb-5">Frequently Asked Questions</h2>

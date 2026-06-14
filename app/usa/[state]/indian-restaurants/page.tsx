@@ -34,7 +34,6 @@ export default async function StateHubPage({ params }: { params: { state: string
       prisma.restaurant.findMany({
         where: { state: stateName, is_published: true },
         orderBy: { publish_priority: 'desc' },
-        take: 24,
         select: {
           slug: true, name: true, city: true, state: true,
           rating: true, reviews: true, photo: true,
