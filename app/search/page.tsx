@@ -24,7 +24,7 @@ function buildPageRange(current: number, total: number): (number | 'gap')[] {
     visible.add(p);
   }
 
-  const sorted = [...visible].sort((a, b) => a - b);
+  const sorted = Array.from(visible).sort((a, b) => a - b);
   const result: (number | 'gap')[] = [];
   for (let i = 0; i < sorted.length; i++) {
     if (i > 0 && sorted[i] - sorted[i - 1] > 1) result.push('gap');

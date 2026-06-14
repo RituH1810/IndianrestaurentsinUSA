@@ -46,8 +46,11 @@ export function FilterableGrid({ restaurants, emptyMessage = 'No restaurants fou
   const [dietaryFilter, setDietaryFilter] = useState<string | null>(null);
   const [minRating, setMinRating] = useState<number | null>(null);
 
-  // Silently sort by location if permission already granted
+  // Re-sort by distance whenever the restaurant list changes (includes initial mount)
   useEffect(() => {
+    setBaseList(restaurants);
+    setLocationActive(false);
+
     if (!navigator.geolocation) return;
     navigator.geolocation.getCurrentPosition(
       ({ coords }) => {
@@ -63,7 +66,7 @@ export function FilterableGrid({ restaurants, emptyMessage = 'No restaurants fou
       () => {},
       { timeout: 4000, maximumAge: 300_000 },
     );
-  }, []);
+  }, [restaurants]);
 
   const availableCuisines = useMemo(() => {
     const tags = new Set<string>();
