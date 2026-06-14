@@ -1,6 +1,7 @@
 import { prisma } from '@/lib/prisma';
 import { RestaurantListCard } from '@/components/restaurant/RestaurantListCard';
 import { SearchBar } from '@/components/filters/SearchBar';
+import { NearMeButton } from '@/components/filters/NearMeButton';
 import type { Metadata } from 'next';
 import type { RestaurantListData } from '@/lib/types';
 
@@ -63,6 +64,9 @@ export default async function SearchPage({ searchParams }: { searchParams: { q?:
 
       <div className="max-w-2xl mb-8">
         <SearchBar defaultValue={q} />
+        <div className="mt-2">
+          <NearMeButton variant="default" />
+        </div>
       </div>
 
       {q && (

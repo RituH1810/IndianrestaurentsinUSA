@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { CUISINES, DIETARY } from '@/lib/taxonomy';
+import { NearMeButton } from '@/components/filters/NearMeButton';
 
 const FEATURED_METROS = [
   { label: 'Edison, NJ', href: '/usa/new-jersey/edison/indian-restaurants', sub: 'New Jersey', emoji: '🌆' },
@@ -109,6 +110,10 @@ export default function HomePage() {
               Search
             </button>
           </form>
+
+          <div className="mt-3 flex justify-center">
+            <NearMeButton variant="hero" />
+          </div>
 
           {/* Quick cuisine chips */}
           <div className="mt-6 flex flex-wrap gap-2 justify-center px-2">
