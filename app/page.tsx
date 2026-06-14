@@ -2,6 +2,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { CUISINES, DIETARY } from '@/lib/taxonomy';
 import { NearMeButton } from '@/components/filters/NearMeButton';
+import { InstagramHomeBanner } from '@/components/instagram/InstagramHomeBanner';
 
 const FEATURED_METROS = [
   { label: 'Edison, NJ', href: '/usa/new-jersey/edison/indian-restaurants', sub: 'New Jersey', emoji: '🌆' },
@@ -235,6 +236,9 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+
+      {/* Instagram */}
+      <InstagramHomeBanner />
 
       {/* Why us — light cards on white */}
       <section className="py-16 px-4 bg-gray-50">
