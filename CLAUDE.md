@@ -16,11 +16,17 @@ The Next.js app lives at the **repo root**, not in a subdirectory. The `web/` fo
 ## Color palette
 | Token | Hex | Usage |
 |-------|-----|-------|
-| `maroon` | `#1B3A6B` | Header, hero, dark sections (deep navy) |
-| `spice` | `#2563EB` | Buttons, hover accents (royal blue) |
-| `saffron` | `#E08A1E` | Links, highlights, star color (gold — unchanged) |
-| `turmeric` | `#F4B942` | Badges, secondary accents (unchanged) |
-| `cream` | `#EFF6FF` | Page background (light sky blue) |
+| `maroon` | `#1E3A8A` | Footer, dark sections, headings (deep indigo-navy) |
+| `spice` | `#2563EB` | Buttons, active states, links (royal blue) |
+| `saffron` | `#E08A1E` | Highlights, star ratings, search button (gold) |
+| `turmeric` | `#F4B942` | Badges, secondary accents (amber) |
+| `cream` | `#FFFFFF` | Page background (pure white) |
+
+**Theme: light.** White header, white/gray-50 body sections, vibrant blue gradient hero (`from-blue-600 via-blue-500 to-indigo-600`), dark gray-900 footer. Gold (`saffron`) pops as the accent against blue.
+
+## Logo
+- File: `public/logo.png` — mandala/rangoli design on dark background
+- Used in Header (34×34 circle) and hero section (150×150 with gold ring)
 
 ## Typography
 - **Body:** DM Sans (`--font-dm-sans`) — used everywhere
@@ -44,11 +50,17 @@ The Next.js app lives at the **repo root**, not in a subdirectory. The `web/` fo
 | Component | Location | Purpose |
 |-----------|----------|---------|
 | `ListingClient` | `components/listing/ListingClient.tsx` | Client-side filter bar + ranked list (TripAdvisor style) |
-| `RestaurantListCard` | `components/restaurant/RestaurantListCard.tsx` | Horizontal ranked card with photo, rating, badges, status |
-| `RestaurantCard` | `components/restaurant/RestaurantCard.tsx` | Grid card with photo overlay (homepage/cuisine pages) |
+| `RestaurantListCard` | `components/restaurant/RestaurantListCard.tsx` | Horizontal ranked card — medal ranks for top 3, Open/Closed pill, cuisine/dietary badges |
+| `RestaurantCard` | `components/restaurant/RestaurantCard.tsx` | Grid card with photo overlay (cuisine/state pages) |
 | `MapClient` | `components/map/MapClient.tsx` | Leaflet map, dynamic-imported with `ssr: false` |
-| `Header` | `components/layout/Header.tsx` | Sticky maroon header with saffron-dot wordmark |
-| `Footer` | `components/layout/Footer.tsx` | Dark footer with cuisine/dietary/company links |
+| `Header` | `components/layout/Header.tsx` | **White** sticky header with logo + gray nav links + blue hover |
+| `Footer` | `components/layout/Footer.tsx` | Dark gray-900 footer with cuisine/dietary/company links |
+| `Badge` | `components/ui/Badge.tsx` | Rounded-full pills — cuisine (saffron/30 + maroon text), dietary (emerald-100) |
+
+## Error handling
+- `app/error.tsx` — global error boundary; shows friendly "try again" page instead of Next.js crash screen
+- `app/not-found.tsx` — custom 404 with search/home links
+- All Prisma calls are wrapped in `try/catch` so DB being paused degrades gracefully (empty lists, not crashes)
 
 ## Database
 - **Supabase project ref:** `cumxyszbuyfykqwqgyxo`
@@ -113,6 +125,13 @@ git commit --allow-empty -m "chore: trigger Vercel redeploy" && git push origin 
 
 ## Common issues & fixes
 
+### "Application error: a server-side exception" on live site
+Most likely cause: **Supabase is paused** (free tier pauses after ~1 week of inactivity).
+Fix:
+1. Go to supabase.com → resume the project (takes ~30 sec)
+2. Trigger a redeploy: `git commit --allow-empty -m "chore: redeploy" && git push origin main`
+3. If it persists, check Vercel → Functions → Logs for the actual error
+
 ### Prisma "prepared statement already exists" during Vercel build
 Cause: Using pgBouncer transaction mode (port 6543).
 Fix: Change `DATABASE_URL` in Vercel to port `5432` (session mode), remove `?pgbouncer=true`.
@@ -134,8 +153,11 @@ The local `.env` needs real Supabase credentials. The schema is `postgresql` —
 ### Map page shows error
 Map uses Leaflet/OpenStreetMap — no API key required. If it shows blank, check that `leaflet` and `react-leaflet@4` are installed (`npm install leaflet react-leaflet@4 @types/leaflet`). Note: `react-leaflet@5` requires React 19; this project uses React 18 so pin to v4.
 
+### Mobile search bar overflow
+Hero search: placeholder is intentionally short ("City, cuisine, or name…"), button uses `px-5 md:px-8`, and decorative blur orbs are `hidden md:block`. Do not revert these — they prevent horizontal overflow on narrow screens.
+
 ## What's next
 - Add `ANTHROPIC_API_KEY` and run `classify-cuisine.ts`, `classify-dietary.ts`, `ai-enrich.ts` for accurate AI tagging on all 4,974 restaurants
 - Add more Outscraper city/state Excel files and re-run the full pipeline
-- Implement state listing page with the same `ListingClient` filter bar
-- Add cuisine hub pages (`/indian-food/[cuisine]`) to also use `ListingClient`
+- Apply `ListingClient` filter bar to state listing page (`/usa/[state]/indian-restaurants`)
+- Apply `ListingClient` to cuisine hub pages (`/indian-food/[cuisine]`)
