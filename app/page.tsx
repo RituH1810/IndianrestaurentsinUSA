@@ -8,7 +8,7 @@ const FEATURED_METROS = [
   { label: 'Bay Area, CA', href: '/usa/california/fremont/indian-restaurants', sub: 'California', emoji: '🌉' },
   { label: 'Chicago', href: '/usa/illinois/chicago/indian-restaurants', sub: 'Illinois', emoji: '🏙️' },
   { label: 'Houston', href: '/usa/texas/houston/indian-restaurants', sub: 'Texas', emoji: '🤠' },
-  { label: 'New York', href: '/usa/new-york/new-york-city/indian-restaurants', sub: 'New York', emoji: '🗽' },
+  { label: 'New York', href: '/usa/new-york/new-york/indian-restaurants', sub: 'New York', emoji: '🗽' },
   { label: 'Dallas', href: '/usa/texas/dallas/indian-restaurants', sub: 'Texas', emoji: '⭐' },
   { label: 'Charlotte', href: '/usa/north-carolina/charlotte/indian-restaurants', sub: 'North Carolina', emoji: '🌳' },
   { label: 'Atlanta', href: '/usa/georgia/atlanta/indian-restaurants', sub: 'Georgia', emoji: '🍑' },

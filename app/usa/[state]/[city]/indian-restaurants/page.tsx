@@ -38,8 +38,20 @@ export default async function CityHubPage({ params }: { params: { state: string;
   let total = 0;
 
   try {
+    // Try exact match first; fall back to case-insensitive contains for slugs
+    // that don't perfectly round-trip (e.g. "new-york-city" → "New York City" vs "New York")
+    const exactWhere = { state: stateName, city: cityName, is_published: true };
+    const exactCount = await prisma.restaurant.count({ where: exactWhere });
+    const where = exactCount > 0
+      ? exactWhere
+      : {
+          state: { equals: stateName, mode: 'insensitive' as const },
+          city: { contains: cityName.split(',')[0], mode: 'insensitive' as const },
+          is_published: true,
+        };
+
     const rows = await prisma.restaurant.findMany({
-      where: { state: stateName, city: cityName, is_published: true },
+      where,
       orderBy: { publish_priority: 'desc' },
       take: 200,
       select: {
@@ -51,9 +63,7 @@ export default async function CityHubPage({ params }: { params: { state: string;
       },
     });
 
-    total = await prisma.restaurant.count({
-      where: { state: stateName, city: cityName, is_published: true },
-    });
+    total = await prisma.restaurant.count({ where });
 
     restaurants = rows.map(r => ({
       slug: r.slug,
