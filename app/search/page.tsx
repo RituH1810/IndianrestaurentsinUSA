@@ -105,7 +105,12 @@ export default async function SearchPage({
             ORDER BY distance_miles
             LIMIT 300
           `;
-          restaurants = rows.map(({ distance_miles: _d, ...r }) => r);
+          restaurants = rows.map(r => ({
+            slug: r.slug, name: r.name, city: r.city, state: r.state,
+            rating: r.rating, reviews: r.reviews, photo: r.photo,
+            cuisine_tags: r.cuisine_tags, dietary_tags: r.dietary_tags,
+            is_hidden_gem: r.is_hidden_gem, description: r.description,
+          }));
           total = restaurants.length;
         } catch { /* DB not ready */ }
       }
