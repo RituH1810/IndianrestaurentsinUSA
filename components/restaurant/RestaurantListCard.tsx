@@ -12,6 +12,7 @@ import type { RestaurantListData } from '@/lib/types';
 interface Props {
   restaurant: RestaurantListData;
   rank?: number;
+  distanceMiles?: number;
 }
 
 function RankBadge({ rank }: { rank: number }) {
@@ -43,7 +44,7 @@ function RankBadge({ rank }: { rank: number }) {
   );
 }
 
-export function RestaurantListCard({ restaurant, rank }: Props) {
+export function RestaurantListCard({ restaurant, rank, distanceMiles }: Props) {
   const cuisineTags = parseTags(restaurant.cuisine_tags);
   const dietaryTags = parseTags(restaurant.dietary_tags);
   const businessStatus = restaurant.business_status;
@@ -85,6 +86,9 @@ export function RestaurantListCard({ restaurant, rank }: Props) {
             </Link>
             <p className="text-xs text-gray-400 mt-0.5">
               {restaurant.city}, {restaurant.state}
+              {distanceMiles != null && (
+                <span className="ml-1.5 text-spice font-medium">· {distanceMiles} mi away</span>
+              )}
             </p>
           </div>
           {restaurant.is_hidden_gem && (

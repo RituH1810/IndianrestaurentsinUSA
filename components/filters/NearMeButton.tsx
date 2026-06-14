@@ -2,7 +2,6 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { stateNameToSlug, cityNameToSlug } from '@/lib/utils';
 
 type Status = 'idle' | 'loading' | 'error';
 
@@ -16,7 +15,7 @@ export function NearMeButton({ variant = 'default', className = '' }: Props) {
   const [errorMsg, setErrorMsg] = useState('');
   const router = useRouter();
 
-  async function handleClick() {
+  function handleClick() {
     if (!navigator.geolocation) {
       setErrorMsg('Geolocation not supported by your browser.');
       setStatus('error');
@@ -27,33 +26,9 @@ export function NearMeButton({ variant = 'default', className = '' }: Props) {
     setErrorMsg('');
 
     navigator.geolocation.getCurrentPosition(
-      async (position) => {
+      (position) => {
         const { latitude, longitude } = position.coords;
-        try {
-          const res = await fetch(
-            `https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json`,
-            { headers: { 'User-Agent': 'IndianRestaurantsInUSA/1.0' } }
-          );
-          const data = await res.json();
-          const address = data.address ?? {};
-
-          const city = address.city || address.town || address.village || address.suburb;
-          const state = address.state;
-
-          if (city && state) {
-            const stateSlug = stateNameToSlug(state);
-            const citySlug = cityNameToSlug(city);
-            router.push(`/usa/${stateSlug}/${citySlug}/indian-restaurants`);
-          } else if (state) {
-            router.push(`/usa/${stateNameToSlug(state)}/indian-restaurants`);
-          } else {
-            setErrorMsg('Could not determine your city. Try searching by name.');
-            setStatus('error');
-          }
-        } catch {
-          setErrorMsg('Could not fetch your location. Please search manually.');
-          setStatus('error');
-        }
+        router.push(`/restaurants/near-me?lat=${latitude}&lng=${longitude}`);
       },
       (err) => {
         if (err.code === 1 /* PERMISSION_DENIED */) {
