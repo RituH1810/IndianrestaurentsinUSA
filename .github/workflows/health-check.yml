@@ -1,0 +1,100 @@
+name: Website Health Check
+
+on:
+  schedule:
+    - cron: '0 */3 * * *'  # Every 3 hours (00:00, 03:00, 06:00 ... UTC)
+  workflow_dispatch:        # Allow manual trigger from GitHub Actions tab
+
+jobs:
+  health-check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Record check time
+        run: echo "CHECK_TIME=$(date -u '+%Y-%m-%d %H:%M UTC')" >> $GITHUB_ENV
+
+      # ── Check 1: Homepage loads with expected content ──────────────────────
+      - name: Check homepage
+        id: homepage
+        run: |
+          STATUS=$(curl -s -o /tmp/home.html -w "%{http_code}" --max-time 20 \
+            "https://www.indianrestaurentsinusa.com/")
+          echo "status=$STATUS" >> $GITHUB_OUTPUT
+
+          if [ "$STATUS" != "200" ]; then
+            echo "ok=false"     >> $GITHUB_OUTPUT
+            echo "detail=HTTP $STATUS returned (expected 200)" >> $GITHUB_OUTPUT
+          elif ! grep -q "Indian Restaurants" /tmp/home.html; then
+            echo "ok=false"     >> $GITHUB_OUTPUT
+            echo "detail=HTTP 200 but expected content missing" >> $GITHUB_OUTPUT
+          else
+            echo "ok=true"      >> $GITHUB_OUTPUT
+            echo "detail=OK — HTTP 200, content verified" >> $GITHUB_OUTPUT
+          fi
+
+      # ── Check 2: DB-backed page loads restaurant data ──────────────────────
+      # If Supabase is paused the page still returns 200 but with no restaurant
+      # links — we detect that by looking for /restaurants/ hrefs in the HTML.
+      - name: Check database-backed page
+        id: db
+        run: |
+          STATUS=$(curl -s -o /tmp/best.html -w "%{http_code}" --max-time 20 \
+            "https://www.indianrestaurentsinusa.com/best-indian-restaurants")
+          echo "status=$STATUS" >> $GITHUB_OUTPUT
+
+          if [ "$STATUS" != "200" ]; then
+            echo "ok=false"     >> $GITHUB_OUTPUT
+            echo "detail=HTTP $STATUS returned (expected 200)" >> $GITHUB_OUTPUT
+          elif grep -q 'href="/restaurants/' /tmp/best.html; then
+            echo "ok=true"      >> $GITHUB_OUTPUT
+            echo "detail=OK — HTTP 200, restaurant data loaded from DB" >> $GITHUB_OUTPUT
+          else
+            echo "ok=false"     >> $GITHUB_OUTPUT
+            echo "detail=HTTP 200 but no restaurant data (Supabase likely paused)" >> $GITHUB_OUTPUT
+          fi
+
+      # ── Send alert email on any failure ────────────────────────────────────
+      - name: Send failure alert email
+        if: steps.homepage.outputs.ok != 'true' || steps.db.outputs.ok != 'true'
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: smtp.gmail.com
+          server_port: 465
+          secure: true
+          username: ${{ secrets.GMAIL_USER }}
+          password: ${{ secrets.GMAIL_APP_PASSWORD }}
+          subject: "🚨 ALERT: indianrestaurentsinusa.com health check FAILED"
+          to: indianrestaurentsinusa@gmail.com,riturharsh@gmail.com
+          from: "Health Monitor <${{ secrets.GMAIL_USER }}>"
+          body: |
+            ⚠️  Health check FAILED — www.indianrestaurentsinusa.com
+            Checked at: ${{ env.CHECK_TIME }}
+
+            Results
+            -------
+            Homepage (/):
+              ${{ steps.homepage.outputs.detail }} (HTTP ${{ steps.homepage.outputs.status }})
+
+            DB Page (/best-indian-restaurants):
+              ${{ steps.db.outputs.detail }} (HTTP ${{ steps.db.outputs.status }})
+
+
+            Common causes & fixes
+            ----------------------
+            1. Supabase paused (free tier pauses after ~1 week of inactivity)
+               → Go to supabase.com → Resume the project (takes ~30 sec)
+               → Then trigger a Vercel redeploy:
+                  git commit --allow-empty -m "chore: redeploy" && git push origin main
+
+            2. Vercel deployment error
+               → Check: https://vercel.com/dashboard → Deployments → View Logs
+
+            3. Prisma / DB connection error
+               → Check Vercel → Functions → Logs for the exact error
+
+
+            View this GitHub Actions run:
+            ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+
+            — Automated Health Monitor (runs every 3 hours)
