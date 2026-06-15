@@ -12,12 +12,18 @@ export function CookieBanner() {
   }, []);
 
   function accept() {
-    try { localStorage.setItem('cookie_consent', 'all'); } catch { /* ignore */ }
+    try {
+      localStorage.setItem('cookie_consent', 'all');
+      window.dispatchEvent(new CustomEvent('cookieConsentUpdate', { detail: 'all' }));
+    } catch { /* ignore */ }
     setVisible(false);
   }
 
   function essential() {
-    try { localStorage.setItem('cookie_consent', 'essential'); } catch { /* ignore */ }
+    try {
+      localStorage.setItem('cookie_consent', 'essential');
+      window.dispatchEvent(new CustomEvent('cookieConsentUpdate', { detail: 'essential' }));
+    } catch { /* ignore */ }
     setVisible(false);
   }
 

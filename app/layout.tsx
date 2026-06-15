@@ -5,6 +5,7 @@ import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import { OrganizationJsonLd } from "@/components/seo/JsonLd";
 import { CookieBanner } from "@/components/ui/CookieBanner";
+import { GoogleAnalytics } from "@/components/analytics/GoogleAnalytics";
 
 const dmSans = DM_Sans({
   subsets: ["latin"],
@@ -65,6 +66,7 @@ export default function RootLayout({
         <main id="main-content">{children}</main>
         <Footer />
         <CookieBanner />
+        <GoogleAnalytics />
         {/* Mobile Instagram floating button */}
         <a
           href="https://www.instagram.com/indianrestaurentsinusa/"
