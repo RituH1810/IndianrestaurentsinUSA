@@ -18,7 +18,7 @@ export default function Header() {
     <header className="bg-white text-gray-900 sticky top-0 z-40 border-b border-gray-100 shadow-sm">
       <nav className="container mx-auto px-4 h-14 flex items-center justify-between gap-6">
         {/* Logo */}
-        <Link href="/" className="shrink-0 flex items-center gap-2.5">
+        <Link href="/" className="shrink-0 flex items-center gap-2.5 cursor-pointer hover:opacity-80 transition-opacity">
           <Image
             src="/logo.png"
             alt="Indian Restaurants in USA"
