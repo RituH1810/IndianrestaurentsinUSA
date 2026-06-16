@@ -8,7 +8,7 @@ export default function robots(): MetadataRoute.Robots {
       {
         userAgent: '*',
         allow: '/',
-        disallow: ['/api/', '/search', '/near-me', '/saved', '/compare'],
+        disallow: ['/api/', '/search', '/restaurants/near-me', '/qr-code'],
       },
     ],
     sitemap: `${BASE}/sitemap.xml`,

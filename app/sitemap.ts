@@ -18,6 +18,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${BASE}/about`, lastModified: now, changeFrequency: 'monthly', priority: 0.5 },
     { url: `${BASE}/about/our-data`, lastModified: now, changeFrequency: 'monthly', priority: 0.5 },
     { url: `${BASE}/contact`, lastModified: now, changeFrequency: 'monthly', priority: 0.3 },
+    { url: `${BASE}/instagram`, lastModified: now, changeFrequency: 'monthly', priority: 0.5 },
   ];
 
   const cuisine_pages: MetadataRoute.Sitemap = CUISINES.map(c => ({
