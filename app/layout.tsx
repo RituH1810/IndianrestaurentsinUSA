@@ -41,6 +41,13 @@ export const metadata: Metadata = {
     siteName: "Indian Restaurants in USA",
     locale: "en_US",
     type: "website",
+    url: BASE_URL,
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Indian Restaurants in USA | Find Indian Food Near You",
+    description:
+      "Discover the best Indian restaurants across the United States. Filter by regional cuisine, dietary needs, and location.",
   },
   alternates: {
     canonical: BASE_URL,
