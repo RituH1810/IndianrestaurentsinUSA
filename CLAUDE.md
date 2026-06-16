@@ -44,8 +44,9 @@ The Next.js app lives at the **repo root**, not in a subdirectory. The `web/` fo
 /best-indian-restaurants             Top picks
 /guides/[slug]                       Editorial guides
 /map                                 Interactive Leaflet map
-/search                              Search (dynamic)
+/search                              Search (dynamic) — text + zip code radius
 /instagram                           Instagram page with embedded reels
+/qr-code                             Downloadable QR code PNG for the site
 ```
 
 ## Key components
@@ -57,10 +58,12 @@ The Next.js app lives at the **repo root**, not in a subdirectory. The `web/` fo
 | `RestaurantListCard` | `components/restaurant/RestaurantListCard.tsx` | **`'use client'`** — horizontal ranked card, optional `distanceMiles` prop. Must stay a client component (has onClick handlers). No longer used on listing pages. |
 | `ListingClient` | `components/listing/ListingClient.tsx` | Legacy filter bar + ranked list — kept for reference but not used on any page |
 | `MapClient` | `components/map/MapClient.tsx` | Leaflet map, dynamic-imported with `ssr: false` |
-| `Header` | `components/layout/Header.tsx` | **White** sticky header with logo + gray nav links + blue hover |
-| `Footer` | `components/layout/Footer.tsx` | Dark gray-900 footer with cuisine/dietary/company/Instagram links |
+| `Header` | `components/layout/Header.tsx` | **White** sticky header with logo (links to `/`) + gray nav links + Instagram gradient icon + YouTube red icon (desktop only) + search bar |
+| `Footer` | `components/layout/Footer.tsx` | Dark gray-900 footer with cuisine/dietary/company/Instagram/YouTube links + social icons in bottom bar |
 | `Badge` | `components/ui/Badge.tsx` | Rounded-full pills — cuisine (saffron/30 + maroon text), dietary (emerald-100) |
-| `CookieBanner` | `components/ui/CookieBanner.tsx` | **`'use client'`** — fixed bottom bar on first visit. "Accept all" sets `cookie_consent='all'`, "Essential only" sets `cookie_consent='essential'` in localStorage. Never shows again after choice. |
+| `CookieBanner` | `components/ui/CookieBanner.tsx` | **`'use client'`** — fixed bottom bar on first visit. "Accept all" sets `cookie_consent='all'`, dispatches `cookieConsentUpdate` custom event. "Essential only" sets `cookie_consent='essential'`. Never shows again after choice. |
+| `GoogleAnalytics` | `components/analytics/GoogleAnalytics.tsx` | **`'use client'`** — loads GA4 only after cookie consent is `'all'`. Uses `PageViewTracker` (usePathname + useSearchParams) to fire `page_view` on every client-side navigation. Set `NEXT_PUBLIC_GA_MEASUREMENT_ID` env var to activate. |
+| `GaPageEvent` | `components/analytics/GaPageEvent.tsx` | **`'use client'`** — fires a custom GA4 event on mount. Used on state pages (`view_state` with `state_name`, `restaurant_count`). Reusable: `<GaPageEvent eventName="x" params={{...}} />` |
 | `NearMeButton` | `components/filters/NearMeButton.tsx` | **`'use client'`** — pill button, requests geolocation → redirects to `/restaurants/near-me`. Two variants: `hero` (white border) and `default` (gray border). |
 | `InstagramFeed` | `components/instagram/InstagramFeed.tsx` | **`'use client'`** — renders Instagram blockquote embeds + loads embed.js via `next/script lazyOnload`. |
 | `InstagramHomeBanner` | `components/instagram/InstagramHomeBanner.tsx` | Homepage Instagram section with profile header + 3 embedded reels. |
@@ -80,10 +83,11 @@ The Next.js app lives at the **repo root**, not in a subdirectory. The `web/` fo
 ## Environment variables
 `.env` at project root (gitignored). Required vars:
 ```
-DATABASE_URL    Supabase session pooler URL (port 5432)
-DIRECT_URL      Supabase direct URL (port 5432)
-ANTHROPIC_API_KEY   For AI cuisine/dietary classification scripts
+DATABASE_URL                    Supabase session pooler URL (port 5432)
+DIRECT_URL                      Supabase direct URL (port 5432)
+ANTHROPIC_API_KEY               For AI cuisine/dietary classification scripts
 NEXT_PUBLIC_SITE_URL=https://www.indianrestaurantsinusa.com
+NEXT_PUBLIC_GA_MEASUREMENT_ID   Google Analytics 4 Measurement ID (G-XXXXXXXXXX)
 ```
 
 **Note:** `NEXT_PUBLIC_GOOGLE_MAPS_KEY` is no longer needed — map uses free Leaflet/OpenStreetMap.
@@ -144,25 +148,34 @@ All listing pages (cuisine, dietary, state, city, best restaurants) use `Filtera
 
 ## Search page
 - **3×3 grid** (RestaurantGrid), **30 per page** (10 rows × 3 cols)
-- **Server-side pagination** via `?page=` URL param — count and results fetched in parallel with `Promise.all`
+- **Zip code search:** detects 5-digit input (`/^\d{5}$/`) → geocodes via Nominatim → Haversine SQL (25-mile radius, up to 300 results, ordered by distance). Falls back to text search if geocoding fails. Shows "X restaurants within 25 miles of ZIP XXXXX" heading with distance indicator. No pagination for zip results (bounded by radius).
+- **Text search:** OR query across name, city, state, zip, cuisine_tags, description — all `mode: 'insensitive'`. Server-side pagination via `?page=` URL param.
 - `export const dynamic = 'force-dynamic'` — never cached; each `?q=&page=` combo always re-fetches
-- Pagination controls: numbered buttons + ellipsis + Prev/Next, only shown when `totalPages > 1`
+- Pagination controls: numbered buttons + ellipsis + Prev/Next, only shown when `totalPages > 1` (text search only)
 
 ## Cookie consent
 - `CookieBanner` (`components/ui/CookieBanner.tsx`) — fixed bottom bar, shown on first visit
-- "Accept all" → `localStorage.setItem('cookie_consent', 'all')`, hides banner permanently
+- "Accept all" → `localStorage.setItem('cookie_consent', 'all')` + dispatches `window.dispatchEvent(new CustomEvent('cookieConsentUpdate', { detail: 'all' }))` so GA4 activates immediately in the same tab
 - "Essential only" → `localStorage.setItem('cookie_consent', 'essential')`, hides banner permanently
 - Gracefully handles private/incognito mode (localStorage access failure caught silently)
 - To test: DevTools → Application → Local Storage → delete `cookie_consent` → refresh
 
-## Instagram integration
+## Social media
+**Instagram**
+- Handle: `@indianrestaurentsinusa` (note: "restaurents" — intentional, matches registered handle)
 - `/instagram` page — gradient hero, 3 embedded reels, follow CTA
-- `InstagramFeed` — client component; uses `<blockquote data-instgrm-permalink>` + `embed.js` via `next/script strategy="lazyOnload"`. Calls `window.instgrm.Embeds.process()` on load and on mount (handles client-side navigation).
-- `InstagramHomeBanner` — homepage section (between Top Cities and Why Us) with profile header + `InstagramFeed` + "See all posts" link
-- Mobile floating button — fixed bottom-right Instagram icon in `app/layout.tsx`, `lg:hidden` (only on mobile/tablet), links to Instagram profile
-- Footer — Instagram link in Company column + Instagram icon in bottom bar
+- `InstagramFeed` — client component; `<blockquote data-instgrm-permalink>` + `embed.js` via `next/script lazyOnload`
+- `InstagramHomeBanner` — homepage section with profile header + 3 reels + "See all posts" link
+- Mobile floating button — `fixed bottom-5 right-4 z-50 lg:hidden` (mobile/tablet only)
+- Desktop header — gradient Instagram icon (SVG radialGradient) between nav and search bar
+- Footer — Instagram icon in bottom bar + link in Company column
 - To add more posts: update `POSTS` array in `app/instagram/page.tsx` and `components/instagram/InstagramHomeBanner.tsx`
-- Instagram handle: `@indianrestaurentsinusa` (note: "restaurents" not "restaurants" — intentional, matches the registered handle)
+
+**YouTube**
+- Handle: `@indianrestaurentsinusa/shorts`
+- Floating button — `fixed bottom-20 right-4 lg:bottom-6 lg:right-6 z-50` — visible on ALL screen sizes. On mobile sits above Instagram button; on desktop occupies bottom-right (Instagram hidden on desktop).
+- Desktop header — red YouTube icon next to Instagram icon
+- Footer — YouTube icon in bottom bar + link in Company column
 
 ## business_status field
 `OPERATIONAL` means the business is not permanently/temporarily closed — it does NOT mean open right now (no real-time hours data from Outscraper). Never display "Open" for `OPERATIONAL` status.
@@ -230,13 +243,39 @@ The local `.env` needs real Supabase credentials. The schema is `postgresql` —
 Map uses Leaflet/OpenStreetMap — no API key required. If it shows blank, check that `leaflet` and `react-leaflet@4` are installed (`npm install leaflet react-leaflet@4 @types/leaflet`). Note: `react-leaflet@5` requires React 19; this project uses React 18 so pin to v4.
 
 ### Mobile search bar overflow
-Hero search: placeholder is intentionally short ("City, cuisine, or name…"), button uses `px-5 md:px-8`, and decorative blur orbs are `hidden md:block`. Do not revert these — they prevent horizontal overflow on narrow screens.
+Hero search: placeholder is intentionally short ("City, zip code, cuisine, or name…"), button uses `px-5 md:px-8`, and decorative blur orbs are `hidden md:block`. Do not revert these — they prevent horizontal overflow on narrow screens.
 
 ### "Near me" returns 0 results
 Cause: restaurants in DB have NULL or 0 latitude/longitude. The Haversine query skips rows where `latitude IS NULL OR longitude IS NULL OR latitude = 0 OR longitude = 0`. Verify with: `SELECT COUNT(*) FROM "Restaurant" WHERE latitude IS NOT NULL AND latitude != 0;`
+
+## Analytics (Google Analytics 4)
+- `GoogleAnalytics` component in `app/layout.tsx` — only activates after `cookie_consent='all'`
+- `PageViewTracker` (inside `GoogleAnalytics`) uses `usePathname` + `useSearchParams` to fire `gtag('config')` on every client-side route change — required for Next.js App Router SPA navigation
+- Initial script uses `send_page_view: false` to prevent double-counting the first load
+- `GaPageEvent` — reusable component for custom events: `<GaPageEvent eventName="view_state" params={{ state_name, restaurant_count }} />`
+- Currently tracking: `view_state` on all `/usa/[state]/indian-restaurants` pages
+- To add tracking to a new page: import `GaPageEvent` and drop it in the server component's JSX
+- Requires `NEXT_PUBLIC_GA_MEASUREMENT_ID=G-XXXXXXXXXX` in Vercel environment variables + redeploy
+- To verify: open site → accept cookies → GA4 Realtime report should show active users
+
+## Health check (GitHub Actions)
+- Workflow: `.github/workflows/health-check.yml` — runs every 3 hours (`cron: '0 */3 * * *'`) + manual trigger
+- **Check 1:** Homepage returns HTTP 200 and contains "Indian Restaurants"
+- **Check 2:** `/best-indian-restaurants` returns 200 AND contains `href="/restaurants/` links (catches Supabase pause — page returns 200 but empty when DB is down)
+- **On failure:** emails `indianrestaurentsinusa@gmail.com` and `riturharsh@gmail.com` with failure reason + fix steps
+- **Requires two GitHub Secrets:** `GMAIL_USER` (sender Gmail address) + `GMAIL_APP_PASSWORD` (Google App Password)
+- To test manually: GitHub → Actions → Website Health Check → Run workflow
+
+## QR code
+- Page at `/qr-code` — server-side generated using `qrcode` npm package
+- Branded: maroon (`#1E3A8A`) on white, 400px, error correction level H
+- One-click **Download PNG** button saves `indianrestaurentsinusa-qr.png`
+- Points to `https://www.indianrestaurentsinusa.com`
+- Page is `robots: noindex` (not meant for search engines)
 
 ## What's next
 - Add `ANTHROPIC_API_KEY` and run `classify-cuisine.ts`, `classify-dietary.ts`, `ai-enrich.ts` for accurate AI tagging on all 4,974 restaurants
 - Add more Outscraper city/state Excel files and re-run the full pipeline
 - Add more Instagram posts: update `POSTS` array in `app/instagram/page.tsx` and `components/instagram/InstagramHomeBanner.tsx`
 - Add a Privacy Policy page (`/privacy`) linked from the cookie banner
+- Expand GA4 custom events to city pages (`view_city`) and cuisine pages (`view_cuisine`)
