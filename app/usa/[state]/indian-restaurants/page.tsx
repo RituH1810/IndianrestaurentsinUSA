@@ -7,6 +7,7 @@ import { FilterableGrid } from '@/components/restaurant/FilterableGrid';
 import { BreadcrumbJsonLd, ItemListJsonLd } from '@/components/seo/JsonLd';
 import { stateMeta } from '@/lib/seo';
 import { CUISINES } from '@/lib/taxonomy';
+import { GaPageEvent } from '@/components/analytics/GaPageEvent';
 
 const BASE = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.indianrestaurantsinusa.com';
 
@@ -66,6 +67,10 @@ export default async function StateHubPage({ params }: { params: { state: string
         items={restaurants.map(r => ({ name: r.name, url: `${BASE}/restaurants/${r.slug}` }))}
       />
 
+      <GaPageEvent
+        eventName="view_state"
+        params={{ state_name: stateName, restaurant_count: restaurants.length }}
+      />
       <div className="container mx-auto px-4 py-10">
         <nav className="text-sm text-gray-500 mb-4 flex gap-1.5 flex-wrap">
           <Link href="/" className="hover:text-spice">Home</Link>
