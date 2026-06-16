@@ -1,15 +1,35 @@
 'use client';
 
 import Script from 'next/script';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
+import { usePathname, useSearchParams } from 'next/navigation';
 
 const GA_ID = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID;
+
+declare global {
+  interface Window {
+    gtag: (...args: unknown[]) => void;
+  }
+}
+
+// Fires a page_view hit on every client-side navigation
+function PageViewTracker() {
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
+  useEffect(() => {
+    if (!GA_ID || typeof window.gtag !== 'function') return;
+    const url = pathname + (searchParams.toString() ? `?${searchParams.toString()}` : '');
+    window.gtag('config', GA_ID, { page_path: url });
+  }, [pathname, searchParams]);
+
+  return null;
+}
 
 export function GoogleAnalytics() {
   const [hasConsent, setHasConsent] = useState(false);
 
   useEffect(() => {
-    // Check existing consent on mount
     const check = () => {
       try {
         setHasConsent(localStorage.getItem('cookie_consent') === 'all');
@@ -17,7 +37,6 @@ export function GoogleAnalytics() {
     };
     check();
 
-    // Re-check when user makes a choice in the cookie banner (same tab)
     const onConsent = (e: Event) => {
       setHasConsent((e as CustomEvent).detail === 'all');
     };
@@ -33,14 +52,19 @@ export function GoogleAnalytics() {
         src={`https://www.googletagmanager.com/gtag/js?id=${GA_ID}`}
         strategy="afterInteractive"
       />
+      {/* send_page_view: false — PageViewTracker handles all page views including first load */}
       <Script id="google-analytics" strategy="afterInteractive">
         {`
           window.dataLayer = window.dataLayer || [];
           function gtag(){dataLayer.push(arguments);}
           gtag('js', new Date());
-          gtag('config', '${GA_ID}', { page_path: window.location.pathname });
+          gtag('config', '${GA_ID}', { send_page_view: false });
         `}
       </Script>
+      {/* Suspense required by Next.js 14 for useSearchParams in App Router */}
+      <Suspense fallback={null}>
+        <PageViewTracker />
+      </Suspense>
     </>
   );
 }
