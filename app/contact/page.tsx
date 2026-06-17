@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { ContactForm } from '@/components/contact/ContactForm';
 
 export const metadata: Metadata = {
   title: 'Contact — Indian Restaurants in USA',
@@ -28,23 +29,7 @@ export default function ContactPage() {
 
       <div className="mt-10 bg-cream rounded-xl border border-saffron/30 p-6">
         <h2 className="font-bold text-maroon mb-3">Send a Message</h2>
-        <form className="space-y-4">
-          <div>
-            <label htmlFor="contact-name" className="block text-sm font-medium text-gray-700 mb-1">Name</label>
-            <input id="contact-name" type="text" className="w-full px-3 py-2 rounded-lg border border-gray-300 text-sm focus:outline-none focus:ring-2 focus:ring-spice" />
-          </div>
-          <div>
-            <label htmlFor="contact-email" className="block text-sm font-medium text-gray-700 mb-1">Email</label>
-            <input id="contact-email" type="email" className="w-full px-3 py-2 rounded-lg border border-gray-300 text-sm focus:outline-none focus:ring-2 focus:ring-spice" />
-          </div>
-          <div>
-            <label htmlFor="contact-message" className="block text-sm font-medium text-gray-700 mb-1">Message</label>
-            <textarea id="contact-message" rows={4} className="w-full px-3 py-2 rounded-lg border border-gray-300 text-sm focus:outline-none focus:ring-2 focus:ring-spice" />
-          </div>
-          <button type="submit" className="px-5 py-2.5 bg-spice hover:bg-maroon text-white rounded-lg text-sm font-semibold transition-colors">
-            Send Message
-          </button>
-        </form>
+        <ContactForm />
       </div>
     </div>
   );
