@@ -11,6 +11,7 @@ import { HiddenGemBadge } from '@/components/ui/HiddenGemBadge';
 import { StarRating } from '@/components/ui/StarRating';
 import { RestaurantJsonLd, BreadcrumbJsonLd } from '@/components/seo/JsonLd';
 import { restaurantMeta } from '@/lib/seo';
+import { GetDirectionsButton } from '@/components/restaurant/GetDirectionsButton';
 
 const BASE = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.indianrestaurantsinusa.com';
 
@@ -154,6 +155,15 @@ export default async function RestaurantPage({ params }: { params: { slug: strin
           <div className="space-y-5">
             <div className="bg-white rounded-xl border border-gray-200 p-5 space-y-3">
               <h2 className="font-semibold text-gray-800 text-sm uppercase tracking-wide">Contact & Info</h2>
+
+              {/* Directions */}
+              <GetDirectionsButton
+                name={restaurant.name}
+                address={`${restaurant.address}, ${restaurant.city}, ${restaurant.state}`}
+                lat={restaurant.latitude}
+                lng={restaurant.longitude}
+              />
+
               {restaurant.phone && (
                 <div className="text-sm">
                   <span className="text-gray-500">Phone: </span>
