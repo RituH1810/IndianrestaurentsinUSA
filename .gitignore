@@ -38,6 +38,9 @@ yarn-error.log*
 # vercel
 .vercel
 
+# empty artifact folder — Next.js app lives at repo root, not here
+/web
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts

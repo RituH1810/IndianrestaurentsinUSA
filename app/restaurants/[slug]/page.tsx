@@ -12,7 +12,6 @@ import { StarRating } from '@/components/ui/StarRating';
 import { RestaurantJsonLd, BreadcrumbJsonLd } from '@/components/seo/JsonLd';
 import { restaurantMeta } from '@/lib/seo';
 import { GetDirectionsButton } from '@/components/restaurant/GetDirectionsButton';
-import { OrderOnlineButtons } from '@/components/restaurant/OrderOnlineButtons';
 
 const BASE = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.indianrestaurantsinusa.com';
 
@@ -197,12 +196,6 @@ export default async function RestaurantPage({ params }: { params: { slug: strin
                 <div className="text-sm text-gray-500">Located in: {restaurant.located_in}</div>
               )}
             </div>
-
-            <OrderOnlineButtons
-              name={restaurant.name}
-              city={restaurant.city}
-              state={restaurant.state}
-            />
 
             <div className="bg-cream rounded-xl border border-saffron/20 p-5">
               <h2 className="font-semibold text-maroon mb-3 text-sm">More in {restaurant.city}</h2>
