@@ -16,7 +16,7 @@ const PLATFORMS = [
     label: 'DoorDash',
     bg: '#FF3008',
     hover: '#d42a07',
-    getUrl: (name: string, city: string, state: string) =>
+    getUrl: (name: string) =>
       `https://www.doordash.com/search/store/${encodeURIComponent(name)}/${AFFILIATE.doordash}`,
     icon: (
       <svg viewBox="0 0 24 24" className="w-4 h-4 fill-white shrink-0" aria-hidden="true">
@@ -29,7 +29,7 @@ const PLATFORMS = [
     label: 'Uber Eats',
     bg: '#06C167',
     hover: '#05a657',
-    getUrl: (name: string, city: string, state: string) =>
+    getUrl: (name: string, city: string) =>
       `https://www.ubereats.com/search?q=${encodeURIComponent(name)}+${encodeURIComponent(city)}${AFFILIATE.ubereats}`,
     icon: (
       <svg viewBox="0 0 24 24" className="w-4 h-4 fill-white shrink-0" aria-hidden="true">
